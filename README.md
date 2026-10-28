@@ -3,7 +3,7 @@
 เว็บจำลองลูปการทำงานของ AI agent (คิด → เรียกเครื่องมือ → ดูผลลัพธ์ → ตอบ) เทียบกับ chatbot ที่ตอบครั้งเดียว
 ผู้ใช้เลือกโจทย์ กดรัน แล้วดู agent ทำงานทีละขั้น
 
-- **Live:** _ใส่ URL หลัง deploy_
+- **Live:** https://670710293.github.io/agent-loop-playground/
 - **Tech stack:** HTML, CSS, JavaScript (ไม่มี build step), Google Fonts
 
 ## รันในเครื่อง
