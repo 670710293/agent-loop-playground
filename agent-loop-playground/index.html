@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Loop Playground</title>
+<meta name="description" content="ดูว่า AI agent ต่างจาก chatbot ธรรมดายังไง ด้วยการจำลองลูป คิด → เรียกเครื่องมือ → ดูผล ทีละขั้น">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=IBM+Plex+Sans+Thai:wght@400;500&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="hero">
+  <h1>Agent เก่งกว่า chatbot ตรงไหน?</h1>
+  <p>chatbot ตอบทีเดียวจากสิ่งที่จำได้ ส่วน agent จะวนลูปคิด ลงมือ แล้วดูผล จนกว่างานจะเสร็จ เลือกโจทย์แล้วกดรันเพื่อดูเทียบกัน</p>
+</header>
+
+<main>
+  <section class="controls" aria-label="เลือกโจทย์">
+    <div id="chips" class="chips" role="radiogroup" aria-label="โจทย์ตัวอย่าง"></div>
+    <p id="task" class="task"></p>
+    <button id="run" class="run">รันโจทย์นี้</button>
+  </section>
+
+  <section class="compare">
+    <article class="panel">
+      <h2>Chatbot</h2>
+      <p class="sub">ตอบครั้งเดียว ไม่มีเครื่องมือ</p>
+      <div id="bot" class="out" aria-live="polite"></div>
+    </article>
+    <article class="panel agent">
+      <h2>Agent <span id="round" class="round"></span></h2>
+      <p class="sub">วนลูปจนงานเสร็จ ใช้เครื่องมือได้</p>
+      <ol id="trace" class="trace" aria-live="polite"></ol>
+    </article>
+  </section>
+
+  <section class="explain">
+    <h2>ลูปของ agent มี 4 ส่วน</h2>
+    <dl>
+      <dt class="k-think">คิด</dt><dd>โมเดลประเมินเป้าหมายและตัดสินใจว่าขั้นต่อไปควรทำอะไร</dd>
+      <dt class="k-tool">เรียกเครื่องมือ</dt><dd>สั่งใช้ฟังก์ชันภายนอก เช่น ค้นเว็บ ดูสภาพอากาศ หรือเครื่องคิดเลข</dd>
+      <dt class="k-observe">ดูผลลัพธ์</dt><dd>ข้อมูลที่ได้กลับมาถูกส่งเข้าบริบท เพื่อใช้ตัดสินใจรอบถัดไป</dd>
+      <dt class="k-answer">ตอบ</dt><dd>เมื่อมีข้อมูลพอ agent หยุดลูปและสรุปคำตอบให้ผู้ใช้</dd>
+    </dl>
+    <p class="note">หน้านี้เป็นการจำลองด้วยข้อมูลสคริปต์ ไม่ได้เรียกโมเดลจริง ดู README สำหรับวิธีต่อกับ LLM API</p>
+  </section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
