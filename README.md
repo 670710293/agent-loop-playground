@@ -2,7 +2,7 @@
 
 A focused, two-page learning demo that illustrates how a role-based agent workflow can organize a research-and-learning task.
 
-## Live demo
+## Live demo -->  https://670710293.github.io/agent-loop-playground/
 Deploy this repository with GitHub Pages (Settings → Pages → Deploy from branch → `main` → `/ (root)`).
 
 ## Pages
