@@ -1,49 +1,37 @@
-// แหล่งข้อมูลเดียวของ agent: ทั้งหน้า Playground (engine) และหน้า AI Agents ใช้ไฟล์นี้ร่วมกัน
+// Shared, static content for the Agent Loop demo.
+// Model entries describe model families, not a live ranking or a specific SKU.
 const AGENTS = [
-  { id: "planner", name: "Planner", status: "live", role: "ตีความคำขอ",
-    duty: "อ่านข้อความผู้ใช้ ตัดคำนำ (เช่น \"ขอชีทสรุปเรื่อง\") เพื่อหาหัวข้อ และตรวจว่าเป็นภาษาไทยหรืออังกฤษ",
-    sources: "ข้อความที่ผู้ใช้พิมพ์เท่านั้น (ไม่ค้นภายนอก)",
-    steps: ["ตัดคำนำและคำลงท้ายด้วยกฎ regex", "ตรวจภาษาจากตัวอักษร", "ส่งงานให้ Researcher"],
-    from: "ผู้ใช้", to: "Researcher", example: "หัวข้อ \"การสังเคราะห์แสง\" (ภาษา th) ช่วยค้นแหล่งข้อมูลให้หน่อย" },
-  { id: "researcher", name: "Researcher", status: "live", role: "หาและอ่านแหล่งข้อมูล",
-    duty: "ค้นบทความที่เกี่ยวข้อง เลือกอันดับแรกมาอ่าน และเก็บอันดับสองเป็นตัวสำรอง",
-    sources: "Wikipedia API (ค้นภาษาไทยก่อน ถ้าไม่พบลองภาษาอังกฤษ)",
-    steps: ["search_wikipedia ได้สูงสุด 3 บทความ", "fetch_extract อ่านเนื้อหาช่วงนำของบทความ", "ส่งเนื้อหาให้ Analyst", "ถ้า Reviewer ตีกลับ ลองบทความสำรอง"],
-    from: "Planner, Reviewer (ตีกลับ)", to: "Analyst", example: "ส่งเนื้อหาดิบ ขอให้หาคำสำคัญและประโยคหลัก" },
-  { id: "analyst", name: "Analyst", status: "live", role: "ประมวลผลข้อความดิบ",
-    duty: "คำนวณในเบราว์เซอร์ว่าคำไหนสำคัญ ประโยคไหนควรเลือก และอ่านนานเท่าไร",
-    sources: "เนื้อหาที่ Researcher ส่งมา",
-    steps: ["แบ่งคำด้วย Intl.Segmenter", "นับความถี่ ตัดคำหยุด ได้คำสำคัญ 6 คำ", "ให้คะแนนประโยคตามจำนวนคำสำคัญ เลือก 4 ประโยค", "ประมาณเวลาอ่าน"],
-    from: "Researcher", to: "Writer", example: "ส่งคำสำคัญและประโยคหลัก ขอให้จัดเป็นชีท" },
-  { id: "writer", name: "Writer", status: "live", role: "จัดเป็นชีทสรุป",
-    duty: "ประกอบผลของ Analyst เป็นชีท พร้อมคำถามทบทวนและแหล่งอ้างอิง",
-    sources: "ผลจาก Analyst และ URL ที่ Researcher เก็บไว้",
-    steps: ["ประกอบหัวข้อ ประเด็นหลัก คำสำคัญ", "สร้างคำถามทบทวนจากคำสำคัญ", "แนบลิงก์แหล่งอ้างอิง", "สร้างไฟล์ Markdown"],
-    from: "Analyst", to: "Reviewer", example: "ส่งร่างชีทให้ตรวจ" },
-  { id: "reviewer", name: "Reviewer", status: "live", role: "ตรวจก่อนส่งถึงผู้ใช้",
-    duty: "ตรวจเกณฑ์ขั้นต่ำของร่างชีท ถ้าไม่ผ่านจะตีกลับไปให้ Researcher หาบทความอื่น (ไม่เกินจำนวนตัวสำรอง)",
-    sources: "ร่างชีทจาก Writer",
-    steps: ["ประเด็นหลักอย่างน้อย 3 ข้อ", "คำสำคัญอย่างน้อย 3 คำ", "มี URL แหล่งอ้างอิงแบบ https", "ผ่าน: ส่งถึงผู้ใช้ / ไม่ผ่าน: ตีกลับ"],
-    from: "Writer", to: "ผู้ใช้ (ผ่าน) หรือ Researcher (ไม่ผ่าน)", example: "ตีกลับ: ประเด็นหลักน้อยกว่า 3 ข้อ ขอบทความอื่น" },
-  { id: "tutor", name: "Tutor (LLM)", status: "planned", role: "เรียบเรียงและตอบคำถามต่อ",
-    duty: "เรียบเรียงชีทใหม่ด้วยภาษาธรรมชาติและตอบคำถามต่อจากชีทที่ผ่านการตรวจแล้ว",
-    sources: "ชีทที่ผ่านการตรวจ + โมเดลภาษาผ่าน serverless endpoint (ยังไม่ได้ทำ)",
-    steps: ["รับชีทจาก Reviewer", "เรียก LLM ฝั่งเซิร์ฟเวอร์ (key ไม่อยู่ในหน้าเว็บ)", "ส่งคำตอบถึงผู้ใช้"],
-    from: "Reviewer", to: "ผู้ใช้", example: "(แผนในอนาคต)" }
+  { id: "planner", name: "Planner", role: "ตีความคำขอและกำหนดแผน", duty: "แยกหัวข้อหลักจากข้อความผู้ใช้และเลือกภาษาสำหรับการค้นหา", sources: "ข้อความที่ผู้ใช้พิมพ์", steps: ["ตัดคำนำและคำลงท้ายที่พบบ่อย", "ตรวจภาษาจากตัวอักษร", "ส่งหัวข้อให้ Researcher"], from: "ผู้ใช้", to: "Researcher", example: "หัวข้อ + ภาษาที่ตรวจพบ" },
+  { id: "researcher", name: "Researcher", role: "ค้นหาและอ่านแหล่งข้อมูล", duty: "ค้น Wikipedia และดึงบทนำของบทความที่เกี่ยวข้อง", sources: "Wikipedia API", steps: ["ค้นหาบทความสูงสุด 3 รายการ", "ดึงบทนำของบทความที่เลือก", "ส่งข้อความดิบให้ Analyst"], from: "Planner", to: "Analyst", example: "ชื่อบทความ เนื้อหา และ URL" },
+  { id: "analyst", name: "Analyst", role: "วิเคราะห์ข้อความ", duty: "แบ่งคำ นับความถี่ และเลือกประโยคที่มีคำสำคัญ", sources: "ข้อความจาก Researcher", steps: ["แบ่งคำด้วย Intl.Segmenter เมื่อรองรับ", "นับความถี่คำและตัด stop words เบื้องต้น", "เลือกประโยคตามคะแนนคำสำคัญ"], from: "Researcher", to: "Writer", example: "คำสำคัญและประโยคที่คัดเลือก" },
+  { id: "writer", name: "Writer", role: "เรียบเรียงเป็นชีท", duty: "จัดข้อมูลที่ Analyst ส่งมาเป็นโครงสร้างชีทสรุป", sources: "ผลวิเคราะห์และ URL จาก Researcher", steps: ["จัดประเด็นหลักและคำสำคัญ", "สร้างคำถามทบทวนจากคำสำคัญ", "แนบแหล่งอ้างอิง"], from: "Analyst", to: "Reviewer", example: "ร่าง Learning Sheet ในรูปแบบ Markdown" },
+  { id: "reviewer", name: "Reviewer", role: "ตรวจเงื่อนไขก่อนส่ง", duty: "ตรวจจำนวนประเด็น คำสำคัญ และรูปแบบ URL ไม่ใช่การตรวจข้อเท็จจริงเชิงความหมาย", sources: "ร่างชีทจาก Writer", steps: ["ตรวจว่ามีประเด็นหลักอย่างน้อย 3 ข้อ", "ตรวจว่ามีคำสำคัญอย่างน้อย 3 คำ", "ตรวจว่ามี URL อ้างอิงแบบ HTTPS"], from: "Writer", to: "ผู้ใช้", example: "ผ่าน/ไม่ผ่านตามเกณฑ์พื้นฐาน" }
 ];
-const MODELS = {
-  note: "ข้อมูลเชิงภาพรวม ไม่ใช่ผลทดสอบ benchmark ชื่อรุ่นและเงื่อนไขราคาเปลี่ยนเร็ว ตรวจรุ่นล่าสุดที่หน้าทางการก่อนเลือกใช้ ตอนนี้ agent ในเว็บนี้ยังไม่ได้เรียกโมเดลเหล่านี้ แต่ออกแบบให้เสียบ Tutor (LLM) เพิ่มได้",
-  criteria: ["งานเขียนโค้ด/ข้อมูลหลายขั้น ต้องใช้เครื่องมือได้ (tool use)", "context ยาวพอสำหรับโค้ดหรือตารางใหญ่", "ค่าใช้จ่ายและ free tier", "ความเป็นส่วนตัวของข้อมูล (ข้อมูลลับควรรันโมเดลเปิดในเครื่อง)"],
-  groups: [
-    { title: "1. Coding / Programming", items: [
-      { name: "Claude (Anthropic)", fit: "อธิบายเหตุผลของโค้ด งานหลายไฟล์ และ debug", note: "มีเครื่องมือเขียนโค้ดแบบ agent ผ่านเทอร์มินัล", url: "https://docs.claude.com" },
-      { name: "GPT (OpenAI)", fit: "ถามตอบโค้ดทั่วไป มีระบบนิเวศเครื่องมือและปลั๊กอินมาก", note: "ดูรุ่นล่าสุดที่หน้า Models", url: "https://platform.openai.com/docs/models" },
-      { name: "Gemini (Google)", fit: "ไฟล์/โปรเจกต์ใหญ่ที่ต้องใช้ context ยาว", note: "มักมีโควต้าฟรีให้ทดลอง ตรวจเงื่อนไขปัจจุบัน", url: "https://ai.google.dev/gemini-api/docs/models" },
-      { name: "โมเดลเปิด (เช่น Qwen Coder, DeepSeek)", fit: "รันเองในเครื่อง ไม่ส่งโค้ดออกนอก", note: "ต้องมีเครื่องแรงพอ คุณภาพขึ้นกับขนาดโมเดล", url: "" } ] },
-    { title: "2. Data Management", items: [
-      { name: "Claude (Anthropic)", fit: "เขียน SQL/pandas อธิบายขั้นตอนล้างข้อมูล", note: "เปิด Code Execution ในแชทเพื่อให้รันคำนวณจริง", url: "https://docs.claude.com" },
-      { name: "GPT (OpenAI)", fit: "วิเคราะห์ไฟล์ตารางผ่านโหมดรันโค้ดในแชท", note: "ตรวจว่าแพ็กเกจที่ใช้มีโหมดนี้", url: "https://platform.openai.com/docs/models" },
-      { name: "Gemini (Google)", fit: "ตารางใหญ่ และทำงานร่วมกับ Google Sheets", note: "ตรวจความสามารถตามแผนที่ใช้", url: "https://ai.google.dev/gemini-api/docs/models" },
-      { name: "โมเดลเปิดขนาดเล็ก", fit: "ข้อมูลลับที่ห้ามออกจากเครื่อง", note: "ให้โค้ดหรือฐานข้อมูลคำนวณตัวเลข อย่าให้โมเดลคิดเลขเอง", url: "" } ] }
-  ]
-};
+
+const MODEL_CATEGORIES = [
+  { id: "learning", title: "Learning & Research", description: "อธิบายแนวคิด สังเคราะห์ความรู้ และช่วยค้นคว้า", models: [
+    { name: "Claude models", provider: "Anthropic", fit: "อ่านและอธิบายเนื้อหายาว รวมถึงช่วยเรียบเรียงแนวคิด", strengths: ["เหมาะกับการทำงานกับข้อความและเอกสาร", "ใช้ช่วยสรุปและอธิบายแนวคิดได้"], caveat: "ตรวจสอบข้อเท็จจริงและแหล่งอ้างอิงแยกต่างหาก", url: "https://docs.anthropic.com/" },
+    { name: "Gemini models", provider: "Google", fit: "เรียนรู้จากข้อความและงานที่ต้องใช้ความสามารถหลายรูปแบบ", strengths: ["มีตระกูลโมเดลหลายระดับ", "รองรับงาน multimodal ในรุ่นที่กำหนด"], caveat: "ความสามารถขึ้นกับรุ่นและผลิตภัณฑ์ที่เลือก", url: "https://ai.google.dev/gemini-api/docs/models" }
+  ]},
+  { id: "general", title: "General Chat", description: "สนทนาทั่วไป ช่วยคิด และทำงานประจำวัน", models: [
+    { name: "GPT models", provider: "OpenAI", fit: "ถามตอบทั่วไป ระดมความคิด และทำงานหลายรูปแบบ", strengths: ["มีโมเดลหลายระดับให้เลือก", "มีเอกสาร API และเครื่องมือสำหรับนักพัฒนา"], caveat: "ความสามารถและราคาแตกต่างกันตามรุ่นและแพ็กเกจ", url: "https://platform.openai.com/docs/models" },
+    { name: "Claude models", provider: "Anthropic", fit: "สนทนาและช่วยจัดการงานที่มีบริบทยาว", strengths: ["เหมาะกับการทำงานกับข้อความ", "มีตัวเลือกหลายระดับประสิทธิภาพ"], caveat: "ควรตรวจข้อจำกัดของรุ่นที่ใช้งาน", url: "https://docs.anthropic.com/" }
+  ]},
+  { id: "coding", title: "Coding & Development", description: "ช่วยเขียนโค้ด อธิบาย Debug และทำความเข้าใจโปรเจกต์", models: [
+    { name: "GPT models", provider: "OpenAI", fit: "ช่วยเขียนโค้ด อธิบายปัญหา และใช้เครื่องมือพัฒนา", strengths: ["มีเอกสาร API สำหรับเชื่อมเข้ากับ workflow", "รองรับงาน coding หลายลักษณะตามรุ่น"], caveat: "ต้องรันทดสอบโค้ดจริงก่อนนำไปใช้", url: "https://platform.openai.com/docs/models" },
+    { name: "Claude models", provider: "Anthropic", fit: "อธิบายโค้ดและช่วยทำงานกับไฟล์หรือโปรเจกต์", strengths: ["เหมาะกับการอ่านและแก้ไขข้อความ/โค้ด", "มีเครื่องมือสำหรับ coding workflow"], caveat: "ผลลัพธ์อาจผิดพลาด ต้องตรวจ diff และทดสอบ", url: "https://docs.anthropic.com/" },
+    { name: "Qwen models", provider: "Qwen / Alibaba", fit: "เป็นอีกตระกูลโมเดลที่มีตัวเลือกด้านการเขียนโค้ด", strengths: ["มีโมเดลหลายขนาดและตัวเลือกแบบเปิด", "เหมาะสำหรับผู้ที่ต้องการทดลอง self-hosting บางรุ่น"], caveat: "การติดตั้งและทรัพยากรขึ้นกับรุ่นที่เลือก", url: "https://qwen.readthedocs.io/" }
+  ]},
+  { id: "data", title: "Data Analysis", description: "ช่วยทำความเข้าใจข้อมูล ตาราง และวางแผนการวิเคราะห์", models: [
+    { name: "GPT models", provider: "OpenAI", fit: "ช่วยเขียน Python/SQL และวางแผนวิเคราะห์ข้อมูล", strengths: ["ช่วยอธิบายขั้นตอนวิเคราะห์", "เชื่อมกับเครื่องมือได้ตามสภาพแวดล้อม"], caveat: "ควรใช้โค้ดหรือเครื่องมือคำนวณตรวจตัวเลข", url: "https://platform.openai.com/docs/models" },
+    { name: "Gemini models", provider: "Google", fit: "ช่วยวิเคราะห์โจทย์ข้อมูลและทำงานกับอินพุตหลายรูปแบบ", strengths: ["มีตัวเลือกโมเดลหลายระดับ", "มีเอกสารสำหรับนักพัฒนา"], caveat: "การจัดการไฟล์และขนาดข้อมูลขึ้นกับรุ่น/แอป", url: "https://ai.google.dev/gemini-api/docs/models" }
+  ]},
+  { id: "long-context", title: "Long Context & Documents", description: "อ่านเอกสารยาว สรุปเนื้อหา และค้นประเด็นจากหลายส่วน", models: [
+    { name: "Gemini models", provider: "Google", fit: "พิจารณาเมื่อโจทย์ต้องใช้ context ยาวหรือสื่อหลายรูปแบบ", strengths: ["บางรุ่นมี context window ขนาดใหญ่", "มีเอกสารระบุขีดจำกัดตามรุ่น"], caveat: "ตรวจ context limit ของรุ่นที่ใช้งานจริง", url: "https://ai.google.dev/gemini-api/docs/models" },
+    { name: "Claude models", provider: "Anthropic", fit: "ทำงานกับเอกสารและบริบทยาว", strengths: ["เหมาะกับการอ่านและสังเคราะห์ข้อความ", "มีเอกสารอธิบายรุ่นและข้อจำกัด"], caveat: "context window และความพร้อมใช้งานขึ้นกับรุ่น", url: "https://docs.anthropic.com/" }
+  ]},
+  { id: "creative", title: "Creative & Multimodal", description: "สร้างสรรค์เนื้อหาและทำงานกับภาพ เสียง หรือสื่อหลายรูปแบบ", models: [
+    { name: "GPT models", provider: "OpenAI", fit: "งานสร้างสรรค์และงานที่ผสมข้อความกับสื่ออื่น", strengths: ["มีโมเดลและผลิตภัณฑ์หลายรูปแบบ", "ความสามารถ multimodal ขึ้นกับรุ่น"], caveat: "ตรวจว่ารุ่นและ API ที่เลือกเปิด modality ที่ต้องการ", url: "https://platform.openai.com/docs/models" },
+    { name: "Gemini models", provider: "Google", fit: "งานที่ต้องรับอินพุตหลายรูปแบบและสร้างผลลัพธ์ตามรุ่น", strengths: ["มีตระกูลโมเดล multimodal", "มีเอกสาร API สำหรับทดลอง"], caveat: "ฟีเจอร์ที่รองรับต่างกันในแต่ละรุ่น", url: "https://ai.google.dev/gemini-api/docs/models" }
+  ]}
+];

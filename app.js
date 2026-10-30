@@ -1,93 +1,199 @@
 const $ = (id) => document.getElementById(id);
-const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-const sleep = (ms) => new Promise((r) => setTimeout(r, reduced ? 0 : ms));
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const pause = (ms) => new Promise((resolve) => setTimeout(resolve, reducedMotion ? 0 : ms));
 const EXAMPLES = ["ขอชีทสรุปเรื่อง การสังเคราะห์แสง", "อธิบาย Recursion ให้เข้าใจง่าย", "สรุปสงครามโลกครั้งที่สอง", "Newton's laws of motion"];
-let runId = 0, lastMd = "";
-const nm = (id) => (id === "user" ? "ผู้ใช้" : AGENTS.find((a) => a.id === id).name);
-const el = (tag, text, cls) => { const e = document.createElement(tag); e.textContent = text; if (cls) e.className = cls; return e; };
+let currentRun = 0;
+let lastMarkdown = "";
 
-function log(kind, who, text, code) {
-  const li = document.createElement("li"); li.className = "step " + kind;
-  li.append(el("b", who), el("p", text));
-  if (code) li.append(el("code", code));
-  $("trace").append(li); $("status").textContent = "· " + $("trace").children.length + " ขั้นตอน";
-}
-function stage(id) {
-  const items = [...$("pipe").children], idx = id === "user" ? items.length : items.findIndex((li) => li.dataset.id === id);
-  items.forEach((li, i) => { li.className = i < idx ? "done" : i === idx ? "active" : ""; i === idx ? li.setAttribute("aria-current", "step") : li.removeAttribute("aria-current"); });
-}
-function fail() { const a = $("pipe").querySelector(".active"); if (a) { a.className = "fail"; a.removeAttribute("aria-current"); } }
-const say = (from, to, text) => { stage(to); log("msg", `${nm(from)} → ${nm(to)}`, text); };
+const make = (tag, text, className) => {
+  const node = document.createElement(tag);
+  if (text !== undefined && text !== null) node.textContent = text;
+  if (className) node.className = className;
+  return node;
+};
+const agentName = (id) => id === "user" ? "ผู้ใช้" : (AGENTS.find((agent) => agent.id === id)?.name || id);
 
-// Planner: ตัดคำนำ/คำลงท้ายเพื่อหาหัวข้อ
-function plan(input) {
-  const t = input.replace(/^(?:ช่วย|ขอ|อยากได้)?\s*(?:ชีทสรุป|สรุป|อธิบาย)?\s*(?:เรื่อง|หัวข้อ)?\s*/i, "").replace(/\s*(?:ให้เข้าใจง่าย|ให้หน่อย|หน่อย|ครับ|ค่ะ|นะ)+\s*$/, "").trim();
-  return t || input.trim();
+function addTrace(kind, who, message, detail) {
+  const item = make("li", null, `step ${kind}`);
+  item.append(make("b", who), make("p", message));
+  if (detail) item.append(make("code", detail));
+  $("trace").append(item);
+  $("status").textContent = `· ${$("trace").children.length} ขั้นตอน`;
 }
-// Writer: ประกอบชีท
-function compose(page, a, lang) {
-  const q = a.keywords.slice(0, 3).map((k) => `อธิบาย "${k}" ด้วยคำพูดของตัวเอง`);
-  const md = `# ชีทสรุป: ${page.title}\n\n## ประเด็นหลัก\n${a.points.map((x) => "- " + x).join("\n")}\n\n## คำสำคัญ\n${a.keywords.join(", ")}\n\n## ทบทวนตัวเอง\n${q.map((x, i) => `${i + 1}. ${x}`).join("\n")}\n\n## แหล่งอ้างอิง\n- Wikipedia (${lang}): ${page.title} — ${page.url}\n`;
-  return { title: page.title, url: page.url, lang, points: a.points, keywords: a.keywords, questions: q, words: a.words, minutes: a.minutes, md };
+function setStage(id) {
+  const items = [...$("pipe").children];
+  const index = id === "user" ? items.length : items.findIndex((item) => item.dataset.id === id);
+  items.forEach((item, position) => {
+    item.className = position < index ? "done" : position === index ? "active" : "";
+    if (position === index) item.setAttribute("aria-current", "step");
+    else item.removeAttribute("aria-current");
+  });
 }
-// Reviewer: เกณฑ์ขั้นต่ำ
-function review(d) {
-  const bad = [];
-  if (d.points.length < 3) bad.push("ประเด็นหลักน้อยกว่า 3 ข้อ");
-  if (d.keywords.length < 3) bad.push("คำสำคัญน้อยกว่า 3 คำ");
-  if (!d.url.startsWith("https://")) bad.push("ไม่มี URL อ้างอิง");
-  return bad;
+function failStage() {
+  const active = $("pipe").querySelector(".active");
+  if (active) { active.className = "fail"; active.removeAttribute("aria-current"); }
 }
-function renderSheet(d) {
-  const s = $("sheet"); s.textContent = "";
-  s.append(el("h3", d.title), el("h4", "ประเด็นหลัก"));
-  const ul = el("ul", ""); d.points.forEach((x) => ul.append(el("li", x))); const kws = el("div", "", "kws"); d.keywords.forEach((k) => kws.append(el("span", k, "kw")));
-  s.append(ul, el("h4", "คำสำคัญ"), kws, el("h4", "ทบทวนตัวเอง"));
-  const ol = el("ol", ""); d.questions.forEach((x) => ol.append(el("li", x))); s.append(ol, el("h4", "แหล่งอ้างอิง"));
-  const p = el("p", ""), a = el("a", `Wikipedia (${d.lang}): ${d.title}`); a.href = d.url; a.target = "_blank"; a.rel = "noopener"; p.append(a);
-  s.append(p, el("p", `เนื้อหาประมาณ ${d.words} คำ อ่านราว ${d.minutes} นาที`, "note")); lastMd = d.md; $("sheetBox").hidden = false; $("sheetBox").scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "nearest" });
+function handoff(from, to, message) {
+  setStage(to);
+  addTrace("msg", `${agentName(from)} → ${agentName(to)}`, message);
 }
-
+function extractTopic(input) {
+  const cleaned = input
+    .replace(/^(?:ช่วย|ขอ|อยากได้)?\s*(?:ชีทสรุป|สรุป|อธิบาย)?\s*(?:เรื่อง|หัวข้อ)?\s*/i, "")
+    .replace(/\s*(?:ให้เข้าใจง่าย|ให้หน่อย|หน่อย|ครับ|ค่ะ|นะ)+\s*$/, "").trim();
+  return cleaned || input.trim();
+}
+function composeSheet(page, analysis, language) {
+  const questions = analysis.keywords.slice(0,3).map((word) => `อธิบาย "${word}" ด้วยคำพูดของตัวเอง`);
+  const markdown = `# ชีทสรุป: ${page.title}\n\n> สร้างโดย Agent Loop Demo (Rule-based workflow)\n\n## ประเด็นหลัก\n${analysis.points.map((point) => `- ${point}`).join("\n")}\n\n## คำสำคัญ\n${analysis.keywords.join(", ")}\n\n## ทบทวนตัวเอง\n${questions.map((question,index) => `${index+1}. ${question}`).join("\n")}\n\n## แหล่งอ้างอิง\n- Wikipedia (${language}): ${page.title} — ${page.url}\n\n> หมายเหตุ: ชีทนี้คัดเลือกและจัดโครงสร้างข้อความด้วยกฎใน JavaScript ไม่ใช่การสรุปโดย LLM โปรดตรวจสอบแหล่งข้อมูลต้นฉบับ\n`;
+  return { ...analysis, title: page.title, url: page.url, language, questions, markdown };
+}
+function reviewSheet(sheet) {
+  const issues = [];
+  if (sheet.points.length < 3) issues.push("ประเด็นหลักน้อยกว่า 3 ข้อ");
+  if (sheet.keywords.length < 3) issues.push("คำสำคัญน้อยกว่า 3 คำ");
+  if (!sheet.url.startsWith("https://")) issues.push("URL อ้างอิงไม่ถูกต้อง");
+  return issues;
+}
+function renderSheet(sheet) {
+  const container = $("sheet");
+  container.replaceChildren(make("h3", sheet.title), make("h4", "ประเด็นหลัก"));
+  const points = make("ul");
+  sheet.points.forEach((point) => points.append(make("li", point)));
+  const keywords = make("div", null, "kws");
+  sheet.keywords.forEach((word) => keywords.append(make("span", word, "kw")));
+  container.append(points, make("h4", "คำสำคัญ"), keywords, make("h4", "ทบทวนตัวเอง"));
+  const questions = make("ol");
+  sheet.questions.forEach((question) => questions.append(make("li", question)));
+  const source = make("p");
+  const link = make("a", `Wikipedia (${sheet.language}): ${sheet.title}`);
+  link.href = sheet.url; link.target = "_blank"; link.rel = "noopener noreferrer";
+  source.append(link);
+  container.append(questions, make("h4", "แหล่งอ้างอิง"), source,
+    make("p", `ประมาณ ${sheet.words} คำ · เวลาอ่านราว ${sheet.minutes} นาที`, "note"));
+  lastMarkdown = sheet.markdown;
+  $("sheetBox").hidden = false;
+}
 async function run(input) {
-  const id = ++runId, live = () => id === runId;
-  $("chat").hidden = false; $("ubub").textContent = input; $("trace").textContent = ""; $("sheetBox").hidden = true; $("proc").open = false;
-  $("answer").textContent = "กำลังให้ทีม agent ทำงาน… (กดดูขั้นตอนด้านล่างได้)"; $("status").textContent = ""; $("go").disabled = true; $("answer").className = "busy"; stage("none");
+  const runId = ++currentRun;
+  const isCurrent = () => runId === currentRun;
+  $("chat").hidden = false;
+  $("ubub").textContent = input;
+  $("trace").replaceChildren();
+  $("sheetBox").hidden = true;
+  $("proc").open = false;
+  $("answer").textContent = "กำลังดำเนิน workflow ตามลำดับ Agent…";
+  $("answer").className = "busy";
+  $("status").textContent = "";
+  $("go").disabled = true;
+  setStage("planner");
+
   try {
-    const topic = plan(input), lang0 = /[\u0E00-\u0E7F]/.test(topic) ? "th" : "en";
-    say("user", "planner", input);
-    say("planner", "researcher", `ผู้ใช้ต้องการชีทหมวดการเรียน หัวข้อ "${topic}" (ภาษา ${lang0}) ช่วยค้นแหล่งข้อมูลให้หน่อย`);
-    let cands = [];
-    for (const l of lang0 === "th" ? ["th", "en"] : ["en"]) {
-      await sleep(400); log("tool", "Researcher", "เรียก search_wikipedia()", JSON.stringify({ q: topic, lang: l }));
-      const t = await TOOLS.search_wikipedia({ q: topic, lang: l }); if (!live()) return;
-      log("observe", "Researcher", t.length ? `พบ ${t.length} บทความ: ${t.join(" | ")}` : `ไม่พบผลลัพธ์ในภาษา ${l}`);
-      if (t.length) { cands = t.slice(0, 2).map((title) => ({ title, lang: l })); break; }
+    const topic = extractTopic(input);
+    const initialLanguage = /[\u0E00-\u0E7F]/.test(topic) ? "th" : "en";
+    handoff("user", "planner", "Planner แยกหัวข้อและตรวจภาษาจากข้อความที่ได้รับ");
+    addTrace("observe", "Planner", `หัวข้อ: ${topic} · ภาษา: ${initialLanguage}`);
+    await pause(180);
+    handoff("planner", "researcher", `ส่งหัวข้อ "${topic}" ให้ Researcher ค้น Wikipedia`);
+
+    let candidates = [];
+    const languages = initialLanguage === "th" ? ["th","en"] : ["en","th"];
+    for (const language of languages) {
+      addTrace("tool", "Researcher", `เรียก Wikipedia Search (${language})`, `query = ${JSON.stringify(topic)}`);
+      const titles = await TOOLS.search_wikipedia({ q: topic, lang: language });
+      if (!isCurrent()) return;
+      addTrace("observe", "Researcher", titles.length ? `พบ ${titles.length} บทความ` : `ไม่พบผลลัพธ์ภาษา ${language}`);
+      if (titles.length) { candidates = titles.slice(0,2).map((title) => ({ title, lang: language })); break; }
     }
-    if (!cands.length) { log("observe", "Researcher", "ไม่พบแหล่งข้อมูล ลองเปลี่ยนคำค้นให้กว้างขึ้น"); fail(); $("answer").textContent = "ไม่พบข้อมูลสำหรับหัวข้อนี้ ลองเปลี่ยนคำค้น"; return; }
-    let final = null, last = null;
-    for (let i = 0; i < cands.length && !final; i++) {
-      log("tool", "Researcher", "เรียก fetch_extract()", JSON.stringify(cands[i]));
-      const page = await TOOLS.fetch_extract(cands[i]); if (!live()) return;
-      log("observe", "Researcher", `อ่านได้ ${page.text.length} ตัวอักษร จาก ${page.url}`);
-      say("researcher", "analyst", "ส่งเนื้อหาดิบ ขอให้หาคำสำคัญและประโยคหลัก");
-      await sleep(400); log("tool", "Analyst", "เรียก analyze_text()", `{ text: <${page.text.length} chars> }`);
-      const a = TOOLS.analyze_text({ text: page.text });
-      log("observe", "Analyst", `คำสำคัญ: ${a.keywords.join(", ")} · ประโยคหลัก ${a.points.length} ข้อ`);
-      say("analyst", "writer", "ส่งคำสำคัญและประโยคหลัก ขอให้จัดเป็นชีท");
-      last = compose(page, a, cands[i].lang); say("writer", "reviewer", "ส่งร่างชีทให้ตรวจ");
-      const bad = review(last); await sleep(300); if (!live()) return;
-      if (!bad.length) { final = last; say("reviewer", "user", "ผ่านการตรวจ: ประเด็น คำสำคัญ และแหล่งอ้างอิงครบ"); }
-      else if (i + 1 < cands.length) say("reviewer", "researcher", `ตีกลับ: ${bad.join(", ")} ขอลองบทความสำรอง`);
-      else { final = last; say("reviewer", "user", `ไม่มีตัวสำรองแล้ว ส่งฉบับนี้พร้อมคำเตือน: ${bad.join(", ")}`); }
+    if (!candidates.length) {
+      failStage();
+      $("answer").textContent = "ยังไม่พบหัวข้อที่ตรงกัน ลองใช้คำค้นที่สั้นลงหรือเฉพาะเจาะจงขึ้น";
+      addTrace("observe", "ระบบ", "ไม่พบผลการค้นหาจาก Wikipedia ทั้งสองภาษา");
+      return;
     }
-    $("answer").textContent = "สรุปสั้นๆ: " + (final.points[0] || "").slice(0, 220) + " ดูชีทเต็มด้านล่าง"; renderSheet(final);
-  } catch (e) {
-    log("observe", "ระบบ", `เกิดข้อผิดพลาด: ${e.message}`); fail(); $("answer").textContent = "ทำงานไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่ (เปิดดูขั้นตอนเพื่อดูสาเหตุ)";
-  } finally { if (live()) { $("go").disabled = false; $("answer").className = ""; } }
+
+    let finalSheet = null;
+    for (const candidate of candidates) {
+      addTrace("tool", "Researcher", "ดึงบทนำของบทความ", JSON.stringify(candidate));
+      const page = await TOOLS.fetch_extract({ title: candidate.title, lang: candidate.lang });
+      if (!isCurrent()) return;
+      if (page.text.trim().length < 100) {
+        addTrace("observe", "Researcher", "บทความมีเนื้อหาสั้นเกินไป ข้ามไปยังผลลัพธ์สำรอง");
+        continue;
+      }
+      addTrace("observe", "Researcher", `ดึงข้อความได้ ${page.text.length.toLocaleString()} ตัวอักษร`);
+      handoff("researcher", "analyst", "ส่งข้อความจากแหล่งข้อมูลให้ Analyst ประมวลผล");
+      await pause(180);
+      addTrace("tool", "Analyst", "วิเคราะห์ข้อความใน Browser", `analyze_text(${page.text.length} chars)`);
+      const analysis = TOOLS.analyze_text({ text: page.text });
+      addTrace("observe", "Analyst", `พบคำสำคัญ ${analysis.keywords.length} คำ และคัดประเด็นได้ ${analysis.points.length} ข้อ`);
+      handoff("analyst", "writer", "ส่งผลวิเคราะห์ให้ Writer จัดรูปแบบเป็นชีท");
+      const draft = composeSheet(page, analysis, candidate.lang);
+      handoff("writer", "reviewer", "ส่งร่างชีทให้ Reviewer ตรวจเกณฑ์พื้นฐาน");
+      await pause(180);
+      const issues = reviewSheet(draft);
+      if (!issues.length) {
+        finalSheet = draft;
+        addTrace("observe", "Reviewer", "ผ่านเกณฑ์พื้นฐาน: มีประเด็น คำสำคัญ และ URL");
+        handoff("reviewer", "user", "ส่งชีทสรุปให้ผู้ใช้");
+        break;
+      }
+      addTrace("observe", "Reviewer", `พบข้อจำกัด: ${issues.join(", ")}`);
+      if (candidate !== candidates[candidates.length-1]) {
+        handoff("reviewer", "researcher", "ลองบทความสำรอง เนื่องจากร่างแรกไม่ผ่านเกณฑ์");
+      } else {
+        finalSheet = draft;
+        handoff("reviewer", "user", "ส่งผลลัพธ์พร้อมแจ้งว่าตรวจไม่ผ่านบางเกณฑ์");
+      }
+    }
+    if (!finalSheet) throw new Error("ไม่สามารถดึงเนื้อหาบทความที่ใช้ได้");
+    renderSheet(finalSheet);
+    const warning = reviewSheet(finalSheet);
+    $("answer").textContent = warning.length
+      ? `สร้างชีทได้ แต่ Reviewer พบข้อจำกัด: ${warning.join(", ")} โปรดตรวจสอบต้นฉบับ`
+      : `พบข้อมูลจาก Wikipedia และจัดเป็นชีทสรุปให้แล้ว: ${finalSheet.points[0] || finalSheet.title}`;
+  } catch (error) {
+    if (!isCurrent()) return;
+    failStage();
+    addTrace("observe", "ระบบ", `ทำงานไม่สำเร็จ: ${error.message}`);
+    $("answer").textContent = "เชื่อมต่อแหล่งข้อมูลไม่สำเร็จ โปรดตรวจอินเทอร์เน็ตแล้วลองอีกครั้ง";
+  } finally {
+    if (isCurrent()) { $("go").disabled = false; $("answer").className = ""; }
+  }
 }
 
-AGENTS.filter((a) => a.status === "live").forEach((a) => { const li = el("li", a.name); li.dataset.id = a.id; li.title = a.role; $("pipe").append(li); });
-EXAMPLES.forEach((t) => { const b = el("button", t, "chip"); b.type = "button"; b.onclick = () => { $("q").value = t; run(t); }; $("chips").append(b); });
-$("form").addEventListener("submit", (e) => { e.preventDefault(); const q = $("q").value.trim(); if (q) run(q); });
-$("copy").onclick = async () => { try { await navigator.clipboard.writeText(lastMd); $("copy").textContent = "คัดลอกแล้ว"; } catch { $("copy").textContent = "คัดลอกไม่ได้"; } setTimeout(() => ($("copy").textContent = "คัดลอก Markdown"), 1500); };
-$("dl").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([lastMd], { type: "text/markdown" })); a.download = "study-sheet.md"; a.click(); URL.revokeObjectURL(a.href); };
+AGENTS.forEach((agent) => {
+  const item = make("li", agent.name);
+  item.dataset.id = agent.id;
+  item.title = agent.role;
+  $("pipe").append(item);
+});
+EXAMPLES.forEach((example) => {
+  const button = make("button", example, "chip");
+  button.type = "button";
+  button.addEventListener("click", () => { $("q").value = example; $("q").focus(); });
+  $("chips").append(button);
+});
+$("form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const question = $("q").value.trim();
+  if (question) run(question);
+});
+$("copy").addEventListener("click", async () => {
+  if (!lastMarkdown) return;
+  try {
+    await navigator.clipboard.writeText(lastMarkdown);
+    $("copy").textContent = "คัดลอกแล้ว";
+  } catch {
+    $("copy").textContent = "เบราว์เซอร์ไม่อนุญาตให้คัดลอก";
+  }
+  window.setTimeout(() => { $("copy").textContent = "คัดลอก Markdown"; }, 1800);
+});
+$("dl").addEventListener("click", () => {
+  if (!lastMarkdown) return;
+  const url = URL.createObjectURL(new Blob([lastMarkdown], { type: "text/markdown;charset=utf-8" }));
+  const anchor = make("a");
+  anchor.href = url; anchor.download = "agent-loop-study-sheet.md";
+  document.body.append(anchor); anchor.click(); anchor.remove();
+  URL.revokeObjectURL(url);
+});

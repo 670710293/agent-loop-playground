@@ -3,36 +3,94 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Agent Loop · ผู้ช่วยสายการเรียน</title>
-<meta name="description" content="พิมพ์สิ่งที่อยากเรียน ทีม AI agent จะค้นคว้า ประมวลผล ตรวจ แล้วทำชีทสรุปพร้อมแหล่งอ้างอิง">
+<meta name="description" content="ทดลองเรียนรู้ผ่าน Agent Workflow และเข้าใจความแตกต่างระหว่าง Single AI กับ Multi-Agent">
+<title>Agent Loop · Learning Assistant</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<nav class="nav"><b>Agent Loop</b><a href="index.html" aria-current="page">ลองใช้</a><a href="agents.html">AI Agents</a></nav>
-<header class="hero"><h1>บอกว่าอยากเรียนอะไร ทีม agent จัดชีทให้</h1>
-<p>หมวดการเรียนเท่านั้น พิมพ์ได้เลย เช่น "ขอชีทสรุปเรื่อง การสังเคราะห์แสง" แล้วเปิดดูได้ว่า agent แต่ละตัวไปทำอะไรที่ไหนมาก่อนตอบ</p></header>
+<nav class="nav" aria-label="เมนูหลัก">
+  <a class="brand" href="index.html">Agent Loop<span class="brand-dot">.</span></a>
+  <div class="nav-links">
+    <a href="index.html" aria-current="page">Learning Assistant</a>
+    <a href="models.html">Model Explorer</a>
+    <a class="nav-anchor" href="#approach-comparison">ทำไมต้อง Multi-Agent?</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <p class="eyebrow"><span class="live-dot"></span> INTERACTIVE LEARNING PLAYGROUND</p>
+  <h1>เรียนรู้เรื่องยาก<br><span class="gradient-text">ด้วยทีมที่แบ่งหน้าที่กัน</span></h1>
+  <p class="hero-copy">ลองส่งหัวข้อที่คุณอยากเรียนรู้ แล้วดูว่า Planner, Researcher, Analyst, Writer และ Reviewer ทำงานต่อกันอย่างไร</p>
+  <div class="hero-tags"><span>5 Agent Roles</span><span>Live Wikipedia Search</span><span>GitHub Pages Demo</span></div>
+  <div class="status-legend"><span><b class="legend-live">LIVE</b> Wikipedia API</span><span><b class="legend-demo">DEMO</b> Rule-based Agent Workflow</span><span><b class="legend-planned">PLANNED</b> Real LLM / Backend</span></div>
+</header>
+
 <main>
-  <form id="form" class="ask">
-    <label for="q">สิ่งที่อยากให้ช่วย</label>
-    <div class="row"><input id="q" required maxlength="100" placeholder="ขอชีทสรุปเรื่อง ..." autocomplete="off"><button class="run" id="go">ส่ง</button></div>
-    <div id="chips" class="chips" aria-label="ตัวอย่าง"></div>
-  </form>
-  <ol id="pipe" class="pipe" aria-label="ลำดับการทำงานของทีม agent"></ol>
-  <noscript><p class="note">หน้านี้ต้องเปิดใช้งาน JavaScript</p></noscript>
-  <section id="chat" hidden>
-    <div class="bubble user" id="ubub"></div>
-    <div class="bubble bot">
-      <p id="answer" aria-live="polite"></p>
-      <details id="proc"><summary>ดูว่า AI ทำอะไรมาบ้าง <span id="status" class="status"></span></summary><ol id="trace" class="trace"></ol></details>
+  <section class="workspace" aria-labelledby="ask-title">
+    <div class="section-heading">
+      <div><p class="eyebrow">01 / LEARNING ASSISTANT</p><h2 id="ask-title">วันนี้อยากเรียนรู้อะไร?</h2></div>
+      <span class="status-pill"><span class="live-dot"></span> LIVE DEMO</span>
     </div>
-    <article class="panel" id="sheetBox" hidden><h2>ชีทสรุป</h2><div id="sheet" class="sheet"></div>
-      <div class="acts"><button type="button" id="dl" class="primary">ดาวน์โหลด .md</button><button type="button" id="copy">คัดลอก Markdown</button></div></article>
+    <form id="form" class="ask">
+      <label for="q">หัวข้อหรือคำถามของคุณ</label>
+      <div class="input-row"><input id="q" required maxlength="140" placeholder="เช่น อธิบาย Machine Learning ให้เข้าใจง่าย" autocomplete="off"><button class="run" id="go" type="submit">เริ่มเรียนรู้ <span aria-hidden="true">↗</span></button></div>
+      <div id="chips" class="chips" aria-label="ตัวอย่างคำถาม"></div>
+    </form>
+
+    <section class="workflow-panel" aria-labelledby="workflow-title">
+      <div class="panel-heading"><div><p class="eyebrow">HOW THE TEAM WORKS</p><h3 id="workflow-title">Agent Workflow</h3></div><span class="demo-label">RULE-BASED WORKFLOW</span></div>
+      <ol id="pipe" class="pipe" aria-label="ลำดับการทำงานของ Agent"></ol>
+      <p class="micro-note">ขั้นตอนนี้เป็น JavaScript workflow ที่ทำงานจริงใน Browser ไม่ใช่ LLM หลายตัวสนทนากัน</p>
+    </section>
+
+    <section id="chat" class="result-area" hidden aria-live="polite">
+      <div class="bubble user" id="ubub"></div>
+      <div class="answer-card">
+        <div class="answer-top"><span class="answer-mark">✳</span><div><p class="eyebrow">LEARNING RESULT</p><h3>สรุปสำหรับคุณ</h3></div></div>
+        <p id="answer"></p>
+        <details id="proc" class="process-details"><summary>ดูขั้นตอนการทำงาน <span id="status" class="status"></span></summary><ol id="trace" class="trace"></ol></details>
+      </div>
+      <article class="sheet-card" id="sheetBox" hidden>
+        <div class="sheet-header"><div><p class="eyebrow">YOUR STUDY SHEET</p><h3>ชีทสรุป</h3></div><span class="status-pill">GENERATED IN BROWSER</span></div>
+        <div id="sheet" class="sheet"></div>
+        <div class="acts"><button type="button" id="dl" class="primary">ดาวน์โหลด .md</button><button type="button" id="copy">คัดลอก Markdown</button></div>
+      </article>
+    </section>
+    <p class="disclaimer">ข้อมูลค้นจาก Wikipedia API จริง ส่วนการวิเคราะห์ จัดชีท และตรวจเงื่อนไขทำด้วยกฎใน JavaScript โปรดเปิดแหล่งอ้างอิงเพื่อตรวจสอบก่อนนำไปใช้งานจริง</p>
   </section>
-  <p class="note">ทีม agent นี้ใช้ Wikipedia API จริงเป็นแหล่งข้อมูล แต่การประมวลผลเป็นกฎในโค้ด ไม่ได้ใช้ LLM ตรวจกับต้นฉบับก่อนนำไปใช้จริง · ดูรายละเอียดแต่ละตัวที่หน้า AI Agents</p>
+
+  <section id="approach-comparison" class="comparison-section">
+    <div class="comparison-intro">
+      <p class="eyebrow">02 / THE IDEA</p>
+      <h2>AI ตัวเดียว หรือทีมที่แบ่งหน้าที่?</h2>
+      <p>คำตอบไม่ได้อยู่ที่จำนวน AI แต่อยู่ที่ลักษณะของงานและวิธีออกแบบกระบวนการ</p>
+    </div>
+    <div class="comparison-grid">
+      <article class="compare-card single">
+        <div class="compare-icon">◉</div><p class="eyebrow">SINGLE AI</p><h3>One model, one flow</h3>
+        <div class="single-flow"><span>คำถามจากผู้ใช้</span><b>↓</b><strong>AI Model</strong><b>↓</b><span>คำตอบ</span></div>
+        <p>โมเดลเดียวรับผิดชอบการทำงานทั้งหมด เหมาะกับคำถามทั่วไป งานสั้น และงานที่ไม่ต้องแยกขั้นตอนมาก</p>
+        <ul><li>เริ่มต้นง่ายและรวดเร็ว</li><li>จัดการระบบไม่ซับซ้อน</li><li>อาจตรวจสอบแต่ละขั้นตอนได้ยากกว่า</li></ul>
+      </article>
+      <article class="compare-card multi">
+        <div class="compare-icon">✳</div><p class="eyebrow">MULTI-AGENT</p><h3>Specialists collaborate</h3>
+        <div class="multi-flow">
+          <span>คำถามจากผู้ใช้</span><b>↓</b>
+          <div class="agent-mini"><i>Planner</i><i>Researcher</i><i>Analyst</i><i>Writer</i><i>Reviewer</i></div>
+          <b>↓</b><span>คำตอบที่ผ่าน workflow</span>
+        </div>
+        <p>แบ่งงานเป็นบทบาทเฉพาะ ทำให้แยกขั้นตอนและกำหนดจุดตรวจสอบได้ เหมาะกับงานที่มีหลายขั้นตอน</p>
+        <ul><li>เห็นหน้าที่และลำดับงานชัดเจน</li><li>เพิ่มจุดตรวจสอบระหว่างทางได้</li><li>อาจใช้เวลาและทรัพยากรมากกว่า</li></ul>
+      </article>
+    </div>
+    <div class="takeaway"><strong>ประเด็นสำคัญ</strong><p>Multi-Agent ไม่ได้ดีกว่า Single AI เสมอไป แต่การแบ่งงานและออกแบบ Workflow ให้เหมาะสม อาจช่วยให้งานซับซ้อนจัดการได้เป็นระบบมากขึ้น</p></div>
+    <p class="micro-note">ส่วนนี้เป็นคำอธิบายแนวคิด ไม่ใช่ผล Benchmark หรือการทดลองเปรียบเทียบโมเดลจริง</p>
+  </section>
 </main>
+<footer><a class="brand" href="index.html">Agent Loop<span class="brand-dot">.</span></a><span>Built as a transparent learning demo · GitHub Pages</span><a href="models.html">Explore models →</a></footer>
 <script src="data.js"></script><script src="tools.js"></script><script src="app.js"></script>
 </body>
 </html>

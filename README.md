@@ -1,48 +1,51 @@
-# Agent Loop · ผู้ช่วยสายการเรียน
+# Agent Loop Playground
 
-เว็บที่ให้ผู้ใช้พิมพ์สิ่งที่อยากเรียน แล้วทีม AI agent ค้นคว้า ประมวลผล ตรวจ และทำ **ชีทสรุปพร้อมแหล่งอ้างอิง**
-ทำเป็นโจทย์ก่อนสัมภาษณ์ **YWC 21** (Web Programming) โฟกัสหมวด "การเรียน" หมวดเดียว
+A focused, two-page learning demo that illustrates how a role-based agent workflow can organize a research-and-learning task.
 
-- **Live:** _[ใส่ URL หลัง deploy](https://670710293.github.io/agent-loop-playground/)_
-- **Tech stack:** HTML, CSS, JavaScript (ไม่มี build step), Wikipedia API, GitHub Pages
+## Live demo
+Deploy this repository with GitHub Pages (Settings → Pages → Deploy from branch → `main` → `/ (root)`).
 
-## ฟีเจอร์ และเอาไว้ทำอะไร
+## Pages
+- `index.html` — Learning Assistant, Agent Workflow, study sheet output, and the Single AI vs Multi-Agent explainer.
+- `models.html` — AI Model Explorer with six task categories and a small curated set of model families.
+- `agents.html` — compatibility redirect to `models.html` for old links.
 
-| ฟีเจอร์ | ไฟล์ | เอาไว้ทำอะไร | สถานะ |
-|---|---|---|---|
-| หน้าลองใช้ | `index.html`, `app.js` | พิมพ์คำขอ ได้คำตอบสั้นและชีทสรุป คัดลอก/ดาวน์โหลด `.md` | ใช้งานได้ |
-| ดูกระบวนการ (พับไว้) | `<details>` ใน `index.html` | ผู้ใช้กดเปิดดูได้ว่า agent ทำอะไรที่ไหน และส่งต่อกันอย่างไร | ใช้งานได้ |
-| ทีม agent 5 ตัว | `app.js`, `data.js` | Planner → Researcher → Analyst → Writer → Reviewer | ใช้งานได้ (rule-based) |
-| เครื่องมือ | `tools.js` | ค้น/อ่าน Wikipedia จริง และวิเคราะห์ข้อความในเบราว์เซอร์ | ใช้งานได้ |
-| หน้า AI Agents แท็บ 1 | `agents.html`, `agents.js` | อธิบายแต่ละ agent: หน้าที่ แหล่งข้อมูล ขั้นตอน และการคุยกัน | ใช้งานได้ |
-| หน้า AI Agents แท็บ 2 | `data.js` (`MODELS`) | แนะนำโมเดลสำหรับ Coding และ Data Management | ใช้งานได้ (ข้อมูลภาพรวม) |
-| Tutor (LLM) | (ยังไม่ทำ) | เรียบเรียงชีทและตอบคำถามต่อด้วยโมเดลภาษา | Roadmap |
+## How the demo works
+1. Planner extracts a topic and detects the language.
+2. Researcher searches and fetches an article introduction from Wikipedia's public API.
+3. Analyst applies deterministic, browser-side text heuristics.
+4. Writer assembles a Markdown study sheet.
+5. Reviewer checks basic structural criteria (minimum number of points/keywords and an HTTPS source URL).
 
-หน้า Agents สร้างจากข้อมูลใน `data.js` ชุดเดียวกับที่ engine ใช้ ถ้าแก้ agent ที่นั่น ทั้งสองหน้าเปลี่ยนตามกัน
+**Important:** These are rule-based JavaScript workflow roles, not five independent LLMs. Wikipedia is the live external data source. Analysis, sheet generation, and review are deterministic browser logic. The Reviewer does not fact-check claims semantically. The comparison section is educational, not a measured benchmark.
 
-## ลำดับการทำงานของทีม agent
-```
-ผู้ใช้ → Planner → Researcher → Analyst → Writer → Reviewer → ผู้ใช้
-                       ↑                               │
-                       └──── ตีกลับ (ลองบทความสำรอง) ───┘
-```
-Researcher เรียก Wikipedia API (ไทยก่อน ไม่พบค่อยอังกฤษ) · Analyst นับคำและเลือกประโยคในเบราว์เซอร์ · Reviewer ตรวจเกณฑ์ขั้นต่ำ
-
-## พูดตามจริง
-agent เป็น **rule-based** ไม่ใช่ LLM: โค้ดกำหนดลำดับและข้อความที่ส่งระหว่างกัน แต่แหล่งข้อมูลเป็นของจริง
-ข้อจำกัด: ใช้ Wikipedia แหล่งเดียว, สรุปแบบเลือกประโยคเดิม ไม่ได้เรียบเรียงใหม่, หน้า "โมเดลที่แนะนำ" ไม่ใช่ผลทดสอบ และ agent ในเว็บยังไม่ได้เรียกโมเดลเหล่านั้น
-
-## รันในเครื่อง
+## Run locally
+Use a local static server (recommended):
 ```bash
-python3 -m http.server 8000   # เปิด http://localhost:8000
+python3 -m http.server 8000
 ```
-Deploy: GitHub Pages (Settings → Pages → `main` / root) ไฟล์ต้องอยู่ที่ root ของ repo
+Then open `http://localhost:8000`.
 
-## แผนต่อยอด
-1. `api/summarize.js` (Vercel serverless) เก็บ API key ฝั่งเซิร์ฟเวอร์ แล้วเพิ่ม Tutor (LLM)
-2. ค้นหลายแหล่งและจัดอันดับความน่าเชื่อถือ
-3. แฟลชการ์ดและข้อสอบจากชีท
-4. หมวดอื่นนอกสายการเรียน
+No build step or package installation is required.
 
-## ส่วนที่ใช้ AI ช่วย
-_ผมแจ๊สนะครับ ในตัวโปรเจคนี้ได้มีให้ส่วนของตัว Claude Code ช่วยเจนและตีกับมันหลายรอบประมาณนึงเนื่องจากฟีเจอร์และความต้องการที่ไม่ตรงกันเท่าไหร่55555 และมีใช้ตัว Cursor AI ในการช่วยทำโค้ดต่อหลังจาก Claude หมดโควต้าแล้ว T-T
+## Files
+- `index.html`, `models.html` — two main pages
+- `style.css` — design system and responsive layout
+- `app.js` — Learning Assistant UI and workflow
+- `tools.js` — Wikipedia API and local text analysis
+- `data.js` — Agent definitions and model-family catalogue
+- `models.js` — Model Explorer rendering
+- `docs/` — phase-by-phase planning and implementation reports
+
+## Limitations
+- Wikipedia is the only live research source.
+- Search and extract availability depend on the external API and network.
+- Text analysis uses heuristics and is not equivalent to an LLM summary.
+- Model Explorer describes model families, not a live model ranking, benchmark, or price comparison. Check official documentation for current model versions and capabilities.
+- No backend, authentication, cloud sync, conversation history, or real LLM provider is included.
+- No API keys or secrets are required in the frontend.
+
+## Future development
+Possible next steps include adding approved research providers, real server-side LLM adapters, conversation persistence, a fact-checking reviewer, and controlled Single AI vs Multi-Agent evaluations using a shared task set and transparent metrics.
+
+See `PROJECT_PLAN.md` and `docs/PHASE-*.md` for the roadmap and implementation notes.
