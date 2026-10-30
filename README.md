@@ -2,7 +2,12 @@
 
 เว็บสาธิตแนวคิดการแบ่งงานให้ AI Agent แต่ละตัวรับผิดชอบคนละหน้าที่ เพื่อจัดการงานค้นคว้าและการเรียนรู้ โดยมีหน้าเว็บหลัก 2 หน้า และออกแบบให้เผยแพร่ผ่าน GitHub Pages ได้โดยตรง
 
+<<<<<<< HEAD
 ## ทดลองใช้งานออนไลน์
+=======
+## Live demo -->  https://670710293.github.io/agent-loop-playground/
+Deploy this repository with GitHub Pages (Settings → Pages → Deploy from branch → `main` → `/ (root)`).
+>>>>>>> 8b10212c3789bdc5297f44438cc3c3b43614989b
 
 สามารถเผยแพร่โปรเจกต์นี้ด้วย GitHub Pages ได้ที่  
 **Settings → Pages → Deploy from a branch → เลือก `main` → `/ (root)`**
