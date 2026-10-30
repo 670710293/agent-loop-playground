@@ -10,9 +10,14 @@ function log(kind, who, text, code) {
   const li = document.createElement("li"); li.className = "step " + kind;
   li.append(el("b", who), el("p", text));
   if (code) li.append(el("code", code));
-  $("trace").append(li); $("status").textContent = "· " + who;
+  $("trace").append(li); $("status").textContent = "· " + $("trace").children.length + " ขั้นตอน";
 }
-const say = (from, to, text) => log("msg", `${nm(from)} → ${nm(to)}`, text);
+function stage(id) {
+  const items = [...$("pipe").children], idx = id === "user" ? items.length : items.findIndex((li) => li.dataset.id === id);
+  items.forEach((li, i) => { li.className = i < idx ? "done" : i === idx ? "active" : ""; i === idx ? li.setAttribute("aria-current", "step") : li.removeAttribute("aria-current"); });
+}
+function fail() { const a = $("pipe").querySelector(".active"); if (a) { a.className = "fail"; a.removeAttribute("aria-current"); } }
+const say = (from, to, text) => { stage(to); log("msg", `${nm(from)} → ${nm(to)}`, text); };
 
 // Planner: ตัดคำนำ/คำลงท้ายเพื่อหาหัวข้อ
 function plan(input) {
@@ -36,16 +41,17 @@ function review(d) {
 function renderSheet(d) {
   const s = $("sheet"); s.textContent = "";
   s.append(el("h3", d.title), el("h4", "ประเด็นหลัก"));
-  const ul = el("ul", ""); d.points.forEach((x) => ul.append(el("li", x))); s.append(ul, el("h4", "คำสำคัญ"), el("p", d.keywords.join(" · ")), el("h4", "ทบทวนตัวเอง"));
+  const ul = el("ul", ""); d.points.forEach((x) => ul.append(el("li", x))); const kws = el("div", "", "kws"); d.keywords.forEach((k) => kws.append(el("span", k, "kw")));
+  s.append(ul, el("h4", "คำสำคัญ"), kws, el("h4", "ทบทวนตัวเอง"));
   const ol = el("ol", ""); d.questions.forEach((x) => ol.append(el("li", x))); s.append(ol, el("h4", "แหล่งอ้างอิง"));
   const p = el("p", ""), a = el("a", `Wikipedia (${d.lang}): ${d.title}`); a.href = d.url; a.target = "_blank"; a.rel = "noopener"; p.append(a);
-  s.append(p, el("p", `เนื้อหาประมาณ ${d.words} คำ อ่านราว ${d.minutes} นาที`, "note")); lastMd = d.md; $("sheetBox").hidden = false;
+  s.append(p, el("p", `เนื้อหาประมาณ ${d.words} คำ อ่านราว ${d.minutes} นาที`, "note")); lastMd = d.md; $("sheetBox").hidden = false; $("sheetBox").scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "nearest" });
 }
 
 async function run(input) {
   const id = ++runId, live = () => id === runId;
   $("chat").hidden = false; $("ubub").textContent = input; $("trace").textContent = ""; $("sheetBox").hidden = true; $("proc").open = false;
-  $("answer").textContent = "กำลังให้ทีม agent ทำงาน… (กดดูขั้นตอนด้านล่างได้)"; $("status").textContent = ""; $("go").disabled = true;
+  $("answer").textContent = "กำลังให้ทีม agent ทำงาน… (กดดูขั้นตอนด้านล่างได้)"; $("status").textContent = ""; $("go").disabled = true; $("answer").className = "busy"; stage("none");
   try {
     const topic = plan(input), lang0 = /[\u0E00-\u0E7F]/.test(topic) ? "th" : "en";
     say("user", "planner", input);
@@ -57,7 +63,7 @@ async function run(input) {
       log("observe", "Researcher", t.length ? `พบ ${t.length} บทความ: ${t.join(" | ")}` : `ไม่พบผลลัพธ์ในภาษา ${l}`);
       if (t.length) { cands = t.slice(0, 2).map((title) => ({ title, lang: l })); break; }
     }
-    if (!cands.length) { say("researcher", "user", "ไม่พบแหล่งข้อมูล ลองเปลี่ยนคำค้นให้กว้างขึ้น"); $("answer").textContent = "ไม่พบข้อมูลสำหรับหัวข้อนี้ ลองเปลี่ยนคำค้น"; return; }
+    if (!cands.length) { log("observe", "Researcher", "ไม่พบแหล่งข้อมูล ลองเปลี่ยนคำค้นให้กว้างขึ้น"); fail(); $("answer").textContent = "ไม่พบข้อมูลสำหรับหัวข้อนี้ ลองเปลี่ยนคำค้น"; return; }
     let final = null, last = null;
     for (let i = 0; i < cands.length && !final; i++) {
       log("tool", "Researcher", "เรียก fetch_extract()", JSON.stringify(cands[i]));
@@ -76,10 +82,11 @@ async function run(input) {
     }
     $("answer").textContent = "สรุปสั้นๆ: " + (final.points[0] || "").slice(0, 220) + " ดูชีทเต็มด้านล่าง"; renderSheet(final);
   } catch (e) {
-    log("observe", "ระบบ", `เกิดข้อผิดพลาด: ${e.message}`); $("answer").textContent = "ทำงานไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่ (เปิดดูขั้นตอนเพื่อดูสาเหตุ)";
-  } finally { if (live()) $("go").disabled = false; }
+    log("observe", "ระบบ", `เกิดข้อผิดพลาด: ${e.message}`); fail(); $("answer").textContent = "ทำงานไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่ (เปิดดูขั้นตอนเพื่อดูสาเหตุ)";
+  } finally { if (live()) { $("go").disabled = false; $("answer").className = ""; } }
 }
 
+AGENTS.filter((a) => a.status === "live").forEach((a) => { const li = el("li", a.name); li.dataset.id = a.id; li.title = a.role; $("pipe").append(li); });
 EXAMPLES.forEach((t) => { const b = el("button", t, "chip"); b.type = "button"; b.onclick = () => { $("q").value = t; run(t); }; $("chips").append(b); });
 $("form").addEventListener("submit", (e) => { e.preventDefault(); const q = $("q").value.trim(); if (q) run(q); });
 $("copy").onclick = async () => { try { await navigator.clipboard.writeText(lastMd); $("copy").textContent = "คัดลอกแล้ว"; } catch { $("copy").textContent = "คัดลอกไม่ได้"; } setTimeout(() => ($("copy").textContent = "คัดลอก Markdown"), 1500); };

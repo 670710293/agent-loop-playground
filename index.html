@@ -7,7 +7,7 @@
 <meta name="description" content="พิมพ์สิ่งที่อยากเรียน ทีม AI agent จะค้นคว้า ประมวลผล ตรวจ แล้วทำชีทสรุปพร้อมแหล่งอ้างอิง">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=IBM+Plex+Sans+Thai:wght@400;500&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -20,6 +20,8 @@
     <div class="row"><input id="q" required maxlength="100" placeholder="ขอชีทสรุปเรื่อง ..." autocomplete="off"><button class="run" id="go">ส่ง</button></div>
     <div id="chips" class="chips" aria-label="ตัวอย่าง"></div>
   </form>
+  <ol id="pipe" class="pipe" aria-label="ลำดับการทำงานของทีม agent"></ol>
+  <noscript><p class="note">หน้านี้ต้องเปิดใช้งาน JavaScript</p></noscript>
   <section id="chat" hidden>
     <div class="bubble user" id="ubub"></div>
     <div class="bubble bot">
