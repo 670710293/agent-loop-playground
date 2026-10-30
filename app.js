@@ -1,94 +1,82 @@
 const $ = (id) => document.getElementById(id);
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const sleep = (ms) => new Promise((r) => setTimeout(r, reduced ? 0 : ms));
-const LABEL = { think: "คิด", tool: "เรียกเครื่องมือ", observe: "ดูผลลัพธ์", answer: "ตอบ" };
-const EXAMPLES = ["การสังเคราะห์แสง", "สงครามโลกครั้งที่สอง", "Recursion", "กฎการเคลื่อนที่ของนิวตัน"];
+const EXAMPLES = ["ขอชีทสรุปเรื่อง การสังเคราะห์แสง", "อธิบาย Recursion ให้เข้าใจง่าย", "สรุปสงครามโลกครั้งที่สอง", "Newton's laws of motion"];
 let runId = 0, lastMd = "";
-
-// ---------- เครื่องมือของ agent ----------
-const TOOLS = {
-  // เครื่องมือจริง: เรียก Wikipedia API (รองรับ CORS ด้วย origin=*)
-  async search_wikipedia({ q, lang }) {
-    const u = `https://${lang}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&srlimit=3&format=json&origin=*`;
-    const r = await fetch(u); if (!r.ok) throw new Error("HTTP " + r.status);
-    return ((await r.json()).query?.search || []).map((x) => x.title);
-  },
-  async fetch_extract({ title, lang }) {
-    const u = `https://${lang}.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&redirects=1&titles=${encodeURIComponent(title)}&format=json&origin=*`;
-    const r = await fetch(u); if (!r.ok) throw new Error("HTTP " + r.status);
-    const p = Object.values((await r.json()).query.pages)[0];
-    return { title: p.title, text: p.extract || "", url: `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(p.title.replace(/ /g, "_"))}` };
-  },
-  // ประมวลผลในเบราว์เซอร์: นับความถี่คำ เลือกประโยคสำคัญ ประมาณเวลาอ่าน
-  analyze_text({ text }) {
-    const th = /[\u0E00-\u0E7F]/.test(text);
-    const chunks = text.split(/\n+/).flatMap((p) => p.split(/(?<=[.!?])\s+/)).map((s) => s.trim()).filter((s) => s.length > 30);
-    const words = typeof Intl.Segmenter === "function"
-      ? [...new Intl.Segmenter(th ? "th" : "en", { granularity: "word" }).segment(text)].filter((s) => s.isWordLike).map((s) => s.segment.toLowerCase())
-      : text.toLowerCase().match(/\p{L}+/gu) || [];
-    const stop = new Set("the and for with that this was are from his her has have its also which ที่ และ ของ ใน เป็น การ ความ ได้ จาก มี ซึ่ง โดย กับ หรือ".split(" "));
-    const freq = {};
-    words.filter((w) => w.length >= 3 && !stop.has(w) && !/^\d+$/.test(w)).forEach((w) => (freq[w] = (freq[w] || 0) + 1));
-    const keywords = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 6).map((e) => e[0]);
-    const score = (s) => keywords.filter((k) => s.toLowerCase().includes(k)).length;
-    const picks = chunks.slice(0, 12).map((s, i) => ({ s, i, sc: score(s) })).sort((a, b) => b.sc - a.sc || a.i - b.i).slice(0, 4).sort((a, b) => a.i - b.i)
-      .map((x) => (x.s.length > 320 ? x.s.slice(0, 320) + "…" : x.s));
-    return { keywords, points: picks, minutes: Math.max(1, Math.round(words.length / (th ? 250 : 200))), words: words.length };
-  },
-  // TODO (roadmap): llm_summarize({ text }) เรียก /api/summarize (serverless) เพื่อสรุปด้วย LLM แทนกฎด้านบน
-};
-
-// ---------- UI ----------
-function step(type, text, code) {
-  const li = document.createElement("li"); li.className = "step " + type;
-  const b = document.createElement("b"); b.textContent = LABEL[type];
-  const p = document.createElement("p"); p.textContent = text; li.append(b, p);
-  if (code) { const c = document.createElement("code"); c.textContent = code; li.append(c); }
-  $("trace").append(li); li.scrollIntoView({ block: "nearest" });
-}
+const nm = (id) => (id === "user" ? "ผู้ใช้" : AGENTS.find((a) => a.id === id).name);
 const el = (tag, text, cls) => { const e = document.createElement(tag); e.textContent = text; if (cls) e.className = cls; return e; };
 
-function renderSheet(title, a, url, lang) {
+function log(kind, who, text, code) {
+  const li = document.createElement("li"); li.className = "step " + kind;
+  li.append(el("b", who), el("p", text));
+  if (code) li.append(el("code", code));
+  $("trace").append(li); $("status").textContent = "· " + who;
+}
+const say = (from, to, text) => log("msg", `${nm(from)} → ${nm(to)}`, text);
+
+// Planner: ตัดคำนำ/คำลงท้ายเพื่อหาหัวข้อ
+function plan(input) {
+  const t = input.replace(/^(?:ช่วย|ขอ|อยากได้)?\s*(?:ชีทสรุป|สรุป|อธิบาย)?\s*(?:เรื่อง|หัวข้อ)?\s*/i, "").replace(/\s*(?:ให้เข้าใจง่าย|ให้หน่อย|หน่อย|ครับ|ค่ะ|นะ)+\s*$/, "").trim();
+  return t || input.trim();
+}
+// Writer: ประกอบชีท
+function compose(page, a, lang) {
+  const q = a.keywords.slice(0, 3).map((k) => `อธิบาย "${k}" ด้วยคำพูดของตัวเอง`);
+  const md = `# ชีทสรุป: ${page.title}\n\n## ประเด็นหลัก\n${a.points.map((x) => "- " + x).join("\n")}\n\n## คำสำคัญ\n${a.keywords.join(", ")}\n\n## ทบทวนตัวเอง\n${q.map((x, i) => `${i + 1}. ${x}`).join("\n")}\n\n## แหล่งอ้างอิง\n- Wikipedia (${lang}): ${page.title} — ${page.url}\n`;
+  return { title: page.title, url: page.url, lang, points: a.points, keywords: a.keywords, questions: q, words: a.words, minutes: a.minutes, md };
+}
+// Reviewer: เกณฑ์ขั้นต่ำ
+function review(d) {
+  const bad = [];
+  if (d.points.length < 3) bad.push("ประเด็นหลักน้อยกว่า 3 ข้อ");
+  if (d.keywords.length < 3) bad.push("คำสำคัญน้อยกว่า 3 คำ");
+  if (!d.url.startsWith("https://")) bad.push("ไม่มี URL อ้างอิง");
+  return bad;
+}
+function renderSheet(d) {
   const s = $("sheet"); s.textContent = "";
-  s.append(el("h3", title), el("h4", "ประเด็นหลัก"));
-  const ul = el("ul", ""); a.points.forEach((x) => ul.append(el("li", x))); s.append(ul);
-  s.append(el("h4", "คำสำคัญ"), el("p", a.keywords.join(" · ")), el("h4", "ทบทวนตัวเอง"));
-  const ol = el("ol", ""); a.keywords.slice(0, 3).forEach((k) => ol.append(el("li", `อธิบาย "${k}" ด้วยคำพูดของตัวเอง`))); s.append(ol);
-  s.append(el("h4", "แหล่งอ้างอิง"));
-  const src = el("p", ""), link = el("a", `Wikipedia (${lang}): ${title}`); link.href = url; link.target = "_blank"; link.rel = "noopener";
-  src.append(link); s.append(src, el("p", `เนื้อหาประมาณ ${a.words} คำ อ่านราว ${a.minutes} นาที · ตรวจกับต้นฉบับก่อนใช้จริง`, "note"));
-  lastMd = `# ชีทสรุป: ${title}\n\n## ประเด็นหลัก\n${a.points.map((x) => "- " + x).join("\n")}\n\n## คำสำคัญ\n${a.keywords.join(", ")}\n\n## ทบทวนตัวเอง\n${a.keywords.slice(0, 3).map((k, i) => `${i + 1}. อธิบาย "${k}" ด้วยคำพูดของตัวเอง`).join("\n")}\n\n## แหล่งอ้างอิง\n- Wikipedia (${lang}): ${title} — ${url}\n`;
-  $("acts").hidden = false;
+  s.append(el("h3", d.title), el("h4", "ประเด็นหลัก"));
+  const ul = el("ul", ""); d.points.forEach((x) => ul.append(el("li", x))); s.append(ul, el("h4", "คำสำคัญ"), el("p", d.keywords.join(" · ")), el("h4", "ทบทวนตัวเอง"));
+  const ol = el("ol", ""); d.questions.forEach((x) => ol.append(el("li", x))); s.append(ol, el("h4", "แหล่งอ้างอิง"));
+  const p = el("p", ""), a = el("a", `Wikipedia (${d.lang}): ${d.title}`); a.href = d.url; a.target = "_blank"; a.rel = "noopener"; p.append(a);
+  s.append(p, el("p", `เนื้อหาประมาณ ${d.words} คำ อ่านราว ${d.minutes} นาที`, "note")); lastMd = d.md; $("sheetBox").hidden = false;
 }
 
-async function run(q) {
+async function run(input) {
   const id = ++runId, live = () => id === runId;
-  $("trace").textContent = ""; $("sheet").textContent = ""; $("acts").hidden = true; $("round").textContent = ""; $("go").disabled = true;
+  $("chat").hidden = false; $("ubub").textContent = input; $("trace").textContent = ""; $("sheetBox").hidden = true; $("proc").open = false;
+  $("answer").textContent = "กำลังให้ทีม agent ทำงาน… (กดดูขั้นตอนด้านล่างได้)"; $("status").textContent = ""; $("go").disabled = true;
   try {
-    const first = /[\u0E00-\u0E7F]/.test(q) ? "th" : "en";
-    $("round").textContent = "รอบที่ 1"; step("think", `หัวข้อ "${q}" ต้องมีแหล่งอ้างอิงที่ตรวจสอบได้ จะเริ่มจากค้น Wikipedia ภาษา ${first}`);
-    let lang = first, hits = [];
-    for (const l of first === "th" ? ["th", "en"] : ["en"]) {
-      lang = l; await sleep(500); if (!live()) return;
-      step("tool", "search_wikipedia()", JSON.stringify({ q, lang: l }));
-      hits = await TOOLS.search_wikipedia({ q, lang: l }); if (!live()) return;
-      step("observe", hits.length ? `พบ ${hits.length} ผลลัพธ์: ${hits.join(" | ")}` : "ไม่พบผลลัพธ์");
-      if (hits.length) break;
-      if (l === "th") { $("round").textContent = "รอบที่ 2"; step("think", "ไม่พบในภาษาไทย ลองค้นภาษาอังกฤษแทน"); }
+    const topic = plan(input), lang0 = /[\u0E00-\u0E7F]/.test(topic) ? "th" : "en";
+    say("user", "planner", input);
+    say("planner", "researcher", `ผู้ใช้ต้องการชีทหมวดการเรียน หัวข้อ "${topic}" (ภาษา ${lang0}) ช่วยค้นแหล่งข้อมูลให้หน่อย`);
+    let cands = [];
+    for (const l of lang0 === "th" ? ["th", "en"] : ["en"]) {
+      await sleep(400); log("tool", "Researcher", "เรียก search_wikipedia()", JSON.stringify({ q: topic, lang: l }));
+      const t = await TOOLS.search_wikipedia({ q: topic, lang: l }); if (!live()) return;
+      log("observe", "Researcher", t.length ? `พบ ${t.length} บทความ: ${t.join(" | ")}` : `ไม่พบผลลัพธ์ในภาษา ${l}`);
+      if (t.length) { cands = t.slice(0, 2).map((title) => ({ title, lang: l })); break; }
     }
-    if (!hits.length) { step("answer", "ไม่พบข้อมูลสำหรับหัวข้อนี้ ลองเปลี่ยนคำค้นให้กว้างขึ้น"); return; }
-    await sleep(500); step("think", `เลือกผลลัพธ์อันดับแรก "${hits[0]}" แล้วอ่านเนื้อหา`);
-    step("tool", "fetch_extract()", JSON.stringify({ title: hits[0], lang }));
-    const page = await TOOLS.fetch_extract({ title: hits[0], lang }); if (!live()) return;
-    step("observe", `ได้เนื้อหา ${page.text.length} ตัวอักษร จาก ${page.url}`);
-    if (page.text.length < 80) { step("answer", "เนื้อหาสั้นเกินไปที่จะทำชีท ลองหัวข้ออื่น"); return; }
-    await sleep(500); step("think", "ได้ข้อมูลดิบแล้ว ต้องประมวลผลเองต่อ: หาคำสำคัญ เลือกประโยคหลัก แล้วจัดเป็นชีท");
-    step("tool", "analyze_text()", "{ text: <" + page.text.length + " chars> }");
-    const a = TOOLS.analyze_text({ text: page.text }); await sleep(500); if (!live()) return;
-    step("observe", `คำสำคัญ: ${a.keywords.join(", ")} · ประโยคหลัก ${a.points.length} ข้อ`);
-    step("answer", "สร้างชีทสรุปเสร็จแล้ว ดูทางขวา"); renderSheet(page.title, a, page.url, lang);
+    if (!cands.length) { say("researcher", "user", "ไม่พบแหล่งข้อมูล ลองเปลี่ยนคำค้นให้กว้างขึ้น"); $("answer").textContent = "ไม่พบข้อมูลสำหรับหัวข้อนี้ ลองเปลี่ยนคำค้น"; return; }
+    let final = null, last = null;
+    for (let i = 0; i < cands.length && !final; i++) {
+      log("tool", "Researcher", "เรียก fetch_extract()", JSON.stringify(cands[i]));
+      const page = await TOOLS.fetch_extract(cands[i]); if (!live()) return;
+      log("observe", "Researcher", `อ่านได้ ${page.text.length} ตัวอักษร จาก ${page.url}`);
+      say("researcher", "analyst", "ส่งเนื้อหาดิบ ขอให้หาคำสำคัญและประโยคหลัก");
+      await sleep(400); log("tool", "Analyst", "เรียก analyze_text()", `{ text: <${page.text.length} chars> }`);
+      const a = TOOLS.analyze_text({ text: page.text });
+      log("observe", "Analyst", `คำสำคัญ: ${a.keywords.join(", ")} · ประโยคหลัก ${a.points.length} ข้อ`);
+      say("analyst", "writer", "ส่งคำสำคัญและประโยคหลัก ขอให้จัดเป็นชีท");
+      last = compose(page, a, cands[i].lang); say("writer", "reviewer", "ส่งร่างชีทให้ตรวจ");
+      const bad = review(last); await sleep(300); if (!live()) return;
+      if (!bad.length) { final = last; say("reviewer", "user", "ผ่านการตรวจ: ประเด็น คำสำคัญ และแหล่งอ้างอิงครบ"); }
+      else if (i + 1 < cands.length) say("reviewer", "researcher", `ตีกลับ: ${bad.join(", ")} ขอลองบทความสำรอง`);
+      else { final = last; say("reviewer", "user", `ไม่มีตัวสำรองแล้ว ส่งฉบับนี้พร้อมคำเตือน: ${bad.join(", ")}`); }
+    }
+    $("answer").textContent = "สรุปสั้นๆ: " + (final.points[0] || "").slice(0, 220) + " ดูชีทเต็มด้านล่าง"; renderSheet(final);
   } catch (e) {
-    step("observe", `เกิดข้อผิดพลาด: ${e.message} (ตรวจอินเทอร์เน็ตแล้วลองใหม่)`);
+    log("observe", "ระบบ", `เกิดข้อผิดพลาด: ${e.message}`); $("answer").textContent = "ทำงานไม่สำเร็จ ตรวจอินเทอร์เน็ตแล้วลองใหม่ (เปิดดูขั้นตอนเพื่อดูสาเหตุ)";
   } finally { if (live()) $("go").disabled = false; }
 }
 

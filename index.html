@@ -3,34 +3,34 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Agent Loop Playground · สายการเรียน</title>
-<meta name="description" content="พิมพ์หัวข้อที่อยากเรียน แล้วดู AI agent ค้นคว้า ประมวลผล และทำชีทสรุปพร้อมแหล่งอ้างอิงทีละขั้น">
+<title>Agent Loop · ผู้ช่วยสายการเรียน</title>
+<meta name="description" content="พิมพ์สิ่งที่อยากเรียน ทีม AI agent จะค้นคว้า ประมวลผล ตรวจ แล้วทำชีทสรุปพร้อมแหล่งอ้างอิง">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=IBM+Plex+Sans+Thai:wght@400;500&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<nav class="nav"><b>Agent Loop</b><a href="index.html" aria-current="page">Playground</a><a href="agents.html">AI Agents</a></nav>
-<header class="hero">
-  <h1>ให้ agent ทำชีทสรุปให้ แล้วดูว่ามันคิดยังไง</h1>
-  <p>พิมพ์หัวข้อที่อยากเรียน agent จะวนลูป คิด → ค้นแหล่งข้อมูล → ประมวลผลเอง → สรุปเป็นชีท พร้อมลิงก์อ้างอิง</p>
-</header>
+<nav class="nav"><b>Agent Loop</b><a href="index.html" aria-current="page">ลองใช้</a><a href="agents.html">AI Agents</a></nav>
+<header class="hero"><h1>บอกว่าอยากเรียนอะไร ทีม agent จัดชีทให้</h1>
+<p>หมวดการเรียนเท่านั้น พิมพ์ได้เลย เช่น "ขอชีทสรุปเรื่อง การสังเคราะห์แสง" แล้วเปิดดูได้ว่า agent แต่ละตัวไปทำอะไรที่ไหนมาก่อนตอบ</p></header>
 <main>
   <form id="form" class="ask">
-    <label for="q">หัวข้อที่อยากสรุป</label>
-    <div class="row"><input id="q" required maxlength="80" placeholder="เช่น การสังเคราะห์แสง" autocomplete="off"><button class="run" id="go">เริ่มค้นคว้า</button></div>
-    <div id="chips" class="chips" aria-label="ตัวอย่างหัวข้อ"></div>
+    <label for="q">สิ่งที่อยากให้ช่วย</label>
+    <div class="row"><input id="q" required maxlength="100" placeholder="ขอชีทสรุปเรื่อง ..." autocomplete="off"><button class="run" id="go">ส่ง</button></div>
+    <div id="chips" class="chips" aria-label="ตัวอย่าง"></div>
   </form>
-  <section class="cols">
-    <article class="panel"><h2>กระบวนการคิด <span id="round" class="round"></span></h2><ol id="trace" class="trace" aria-live="polite"></ol></article>
-    <article class="panel"><h2>ชีทสรุป</h2><div id="sheet" class="sheet" aria-live="polite"></div>
-      <div id="acts" class="acts" hidden><button type="button" id="copy">คัดลอก Markdown</button><button type="button" id="dl">ดาวน์โหลด .md</button></div></article>
+  <section id="chat" hidden>
+    <div class="bubble user" id="ubub"></div>
+    <div class="bubble bot">
+      <p id="answer" aria-live="polite"></p>
+      <details id="proc"><summary>ดูว่า AI ทำอะไรมาบ้าง <span id="status" class="status"></span></summary><ol id="trace" class="trace"></ol></details>
+    </div>
+    <article class="panel" id="sheetBox" hidden><h2>ชีทสรุป</h2><div id="sheet" class="sheet"></div>
+      <div class="acts"><button type="button" id="copy">คัดลอก Markdown</button><button type="button" id="dl">ดาวน์โหลด .md</button></div></article>
   </section>
-  <section class="road"><h2>กำลังพัฒนา</h2>
-    <ul><li>สรุปด้วย LLM จริงผ่าน serverless endpoint</li><li>ค้นหลายแหล่งและจัดอันดับความน่าเชื่อถือ</li><li>สร้างแฟลชการ์ดและข้อสอบจากชีท</li></ul>
-    <p class="note">agent ตัวนี้ใช้ Wikipedia API จริงเป็นเครื่องมือ แต่ขั้นสรุปใช้กฎคำนวณในเบราว์เซอร์ ไม่ได้ใช้ LLM ตรวจสอบกับต้นฉบับก่อนนำไปใช้จริง</p></section>
+  <p class="note">ทีม agent นี้ใช้ Wikipedia API จริงเป็นแหล่งข้อมูล แต่การประมวลผลเป็นกฎในโค้ด ไม่ได้ใช้ LLM ตรวจกับต้นฉบับก่อนนำไปใช้จริง · ดูรายละเอียดแต่ละตัวที่หน้า AI Agents</p>
 </main>
-<script src="app.js"></script>
+<script src="data.js"></script><script src="tools.js"></script><script src="app.js"></script>
 </body>
 </html>

@@ -1,35 +1,34 @@
-// ข้อมูล agent ทั้งหมดอยู่ที่นี่ เพิ่มตัวใหม่ได้โดยเพิ่ม object ใน array
-const AGENTS = [
-  { name: "Research Scout", role: "ค้นและรวบรวมแหล่งข้อมูล", use: "หาข้อมูลตั้งต้นของหัวข้อใหม่พร้อมลิงก์อ้างอิง",
-    tools: ["search_web", "fetch_page"],
-    prompt: "คุณคือผู้ช่วยค้นคว้าสำหรับนักเรียน เมื่อได้รับหัวข้อ ให้ค้นอย่างน้อย 3 แหล่ง สรุปสิ่งที่พบ และแนบ URL ทุกข้ออ้างอิง ห้ามอ้างแหล่งที่ไม่ได้เปิดอ่านจริง",
-    caution: "ต้องให้เครื่องมือค้นเว็บจริง ไม่เช่นนั้นโมเดลอาจแต่งแหล่งอ้างอิงขึ้นมาเอง" },
-  { name: "Summary Smith", role: "ทำชีทสรุป", use: "ย่อบทเรียนยาวให้เป็นหัวข้อ ประเด็นหลัก และคำสำคัญ",
-    tools: ["ไม่ต้องใช้ (รับข้อความเข้าตรงๆ)"],
-    prompt: "สรุปเนื้อหาต่อไปนี้เป็นชีท: หัวข้อหลัก, 5 ประเด็นสำคัญ, คำศัพท์พร้อมนิยามสั้น ใช้ภาษาที่นักเรียน ม.ปลายอ่านเข้าใจ และห้ามเพิ่มข้อมูลที่ไม่อยู่ในเนื้อหา",
-    caution: "ถ้าเนื้อหายาวมาก ควรแบ่งเป็นช่วงแล้วสรุปทีละช่วง" },
-  { name: "Flashcard Forge", role: "สร้างแฟลชการ์ด", use: "เปลี่ยนชีทเป็นคำถาม-คำตอบสำหรับท่องจำ",
-    tools: ["ไม่ต้องใช้"],
-    prompt: "จากชีทสรุปนี้ สร้างแฟลชการ์ด 10 ใบ รูปแบบ JSON: [{\"q\":\"...\",\"a\":\"...\"}] คำถามต้องตอบได้จากชีทเท่านั้น",
-    caution: "ให้ตอบเป็น JSON ล้วน แล้ว parse ในโค้ดเพื่อนำไปแสดงเป็นการ์ด" },
-  { name: "Quiz Master", role: "ออกข้อสอบ", use: "ทดสอบความเข้าใจพร้อมเฉลยและคำอธิบาย",
-    tools: ["ไม่ต้องใช้"],
-    prompt: "ออกข้อสอบปรนัย 5 ข้อจากเนื้อหานี้ ข้อละ 4 ตัวเลือก ระบุข้อที่ถูก และอธิบายสั้นๆ ว่าทำไมตัวเลือกอื่นผิด",
-    caution: "ควรให้ผู้ใช้ตอบก่อนแล้วค่อยแสดงเฉลย" },
-  { name: "Study Planner", role: "วางแผนอ่านหนังสือ", use: "แบ่งหัวข้อและเวลาก่อนสอบ",
-    tools: ["calculator", "calendar (ทางเลือก)"],
-    prompt: "ผู้ใช้มีเวลาอ่านวันละ X ชั่วโมง สอบในอีก Y วัน หัวข้อมีดังนี้ จัดตารางอ่านรายวัน เผื่อเวลาทบทวน 20% และเรียงหัวข้อยากไว้ช่วงแรก",
-    caution: "ให้โค้ดคำนวณจำนวนวันและชั่วโมงเอง อย่าให้โมเดลคิดเลขเอง" }
-];
-const grid = document.getElementById("grid");
+const el = (tag, text, cls) => { const e = document.createElement(tag); if (text) e.textContent = text; if (cls) e.className = cls; return e; };
+const list = (tag, items) => { const l = el(tag); items.forEach((x) => l.append(el("li", x))); return l; };
+const p1 = document.getElementById("p1"), p2 = document.getElementById("p2");
+
+// ---- แท็บ 1: agents ----
+const flow = el("p", "", "flow");
+["ผู้ใช้", ...AGENTS.filter((a) => a.status === "live").map((a) => a.name), "ผู้ใช้"].forEach((n, i) => { if (i) flow.append(el("span", "→", "arr")); flow.append(el("span", n, "node")); });
+p1.append(flow, el("p", "Reviewer ตีกลับไป Researcher ได้ 1 ครั้งถ้าชีทไม่ผ่านเกณฑ์ Tutor (LLM) ยังเป็นแผน ไม่ได้ทำงานจริง", "note"));
+const grid = el("div", "", "grid");
 AGENTS.forEach((a) => {
-  const c = document.createElement("article"); c.className = "card";
-  const h = document.createElement("h2"); h.textContent = a.name;
-  const r = document.createElement("p"); r.className = "role"; r.textContent = a.role + " · " + a.use;
-  const t = document.createElement("p"); t.className = "sub"; t.textContent = "เครื่องมือ: " + a.tools.join(", ");
-  const pre = document.createElement("pre"); pre.textContent = a.prompt;
-  const w = document.createElement("p"); w.className = "note"; w.textContent = "ข้อควรระวัง: " + a.caution;
-  const b = document.createElement("button"); b.type = "button"; b.textContent = "คัดลอก prompt";
-  b.onclick = async () => { try { await navigator.clipboard.writeText(a.prompt); b.textContent = "คัดลอกแล้ว"; } catch { b.textContent = "คัดลอกไม่ได้"; } setTimeout(() => (b.textContent = "คัดลอก prompt"), 1500); };
-  c.append(h, r, t, pre, w, b); grid.append(c);
+  const c = el("article", "", "card" + (a.status === "planned" ? " planned" : ""));
+  const h = el("h2", a.name); h.append(el("span", a.status === "live" ? "ทำงานจริง" : "แผนในอนาคต", "badge " + a.status));
+  c.append(h, el("p", a.role, "role"), el("p", a.duty), el("h3", "แหล่งข้อมูล"), el("p", a.sources), el("h3", "ขั้นตอนประมวลผล"), list("ol", a.steps),
+    el("h3", "คุยกับใคร"), el("p", `รับจาก: ${a.from} · ส่งต่อให้: ${a.to}`), el("code", "ตัวอย่างข้อความ: " + a.example));
+  grid.append(c);
 });
+p1.append(grid);
+
+// ---- แท็บ 2: โมเดล ----
+p2.append(el("p", MODELS.note, "note"), el("h2", "เกณฑ์เลือกโมเดล"), list("ul", MODELS.criteria));
+MODELS.groups.forEach((g) => {
+  p2.append(el("h2", g.title)); const gr = el("div", "", "grid");
+  g.items.forEach((m) => {
+    const c = el("article", "", "card"); c.append(el("h2", m.name), el("p", "เหมาะกับ: " + m.fit), el("p", m.note, "sub"));
+    if (m.url) { const a = el("a", "หน้าทางการ"); a.href = m.url; a.target = "_blank"; a.rel = "noopener"; c.append(a); }
+    gr.append(c);
+  });
+  p2.append(gr);
+});
+
+// ---- tabs (คลิก + ลูกศรซ้ายขวา) ----
+const tabs = [document.getElementById("t1"), document.getElementById("t2")], panels = [p1, p2];
+function pick(i) { tabs.forEach((t, j) => { t.setAttribute("aria-selected", String(i === j)); t.tabIndex = i === j ? 0 : -1; panels[j].hidden = i !== j; }); tabs[i].focus(); }
+tabs.forEach((t, i) => { t.onclick = () => pick(i); t.onkeydown = (e) => { if (e.key === "ArrowRight") pick((i + 1) % 2); if (e.key === "ArrowLeft") pick((i + 1) % 2); }; });
