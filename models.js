@@ -17,16 +17,18 @@ MODEL_CATEGORIES.forEach((category, index) => {
   section.id = `category-${category.id}`;
   const heading = node("div", null, "category-heading");
   const titleGroup = node("div");
-  titleGroup.append(node("p", `CATEGORY ${String(index+1).padStart(2,"0")}`, "eyebrow"), node("h2", category.title), node("p", category.description, "category-description"));
-  heading.append(titleGroup, node("span", `${category.models.length} MODEL FAMILIES`, "count-label"));
+  titleGroup.append(node("p", `หมวดที่ ${String(index+1).padStart(2,"0")}`, "eyebrow"), node("h2", category.title), node("p", category.description, "category-description"));
+  heading.append(titleGroup, node("span", `${category.models.length} โมเดลเฉพาะทาง`, "count-label"));
   section.append(heading);
 
   const grid = node("div", null, "model-grid");
   category.models.forEach((model) => {
     const card = node("article", null, "model-card");
     const top = node("div", null, "model-card-top");
-    top.append(node("span", model.provider, "provider-label"), node("span", "OVERVIEW", "model-type"));
-    card.append(top, node("h3", model.name), node("p", model.fit, "model-fit"), node("h4", "จุดเด่น"));
+    top.append(node("span", model.provider, "provider-label"), node("span", "SPECIALIZED MODEL", "model-type"));
+    card.append(top, node("h3", model.name), node("p", model.fit, "model-fit"));
+    if (model.access) card.append(node("span", model.access, "model-type"));
+    card.append(node("h4", "จุดเด่น"));
     const strengths = node("ul");
     model.strengths.forEach((strength) => strengths.append(node("li", strength)));
     card.append(strengths, node("h4", "ข้อควรพิจารณา"), node("p", model.caveat, "caveat"));

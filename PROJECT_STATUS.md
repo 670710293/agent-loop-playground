@@ -1,48 +1,50 @@
-# Implementation Status — Agent Loop Playground v6
+# สถานะการพัฒนา — Agent Loop Playground v8
 
-## Product direction
-- [x] Focused MVP
-- [x] Two main pages: Learning Assistant + Model Explorer
-- [x] Preserve original design direction and static stack
-- [x] GitHub Pages / no build step
-- [x] No frontend API keys
+## ทิศทางโครงการ
+- [x] เวอร์ชัน Live Demo แบบกระชับ (Focused MVP)
+- [x] มีหน้าหลัก 2 หน้า: Learning Assistant และ Model Explorer
+- [x] รักษารูปแบบและเทคโนโลยีเดิม
+- [x] รองรับ GitHub Pages โดยไม่ต้อง Build
+- [x] ไม่มี API Key ใน Frontend
+- [x] Model Explorer ปรับเป็น 6 หมวดเฉพาะทาง
 
-## Phase completion
-- [x] Phase 0 — Audit & Architecture
-- [x] Phase 1 — Navigation & Page Structure
-- [x] Phase 2 — Learning Assistant Polish
-- [x] Phase 3 — Single AI vs Multi-Agent
-- [x] Phase 4 — Model Explorer
-- [x] Phase 5 — Static QA & Release Preparation
+## สถานะ Phase
+- [x] Phase 0 — ตรวจสอบโปรเจกต์และวางสถาปัตยกรรม
+- [x] Phase 1 — Navigation และโครงสร้างหน้า
+- [x] Phase 2 — ปรับ Learning Assistant
+- [x] Phase 3 — เปรียบเทียบ Single AI กับ Multi-Agent
+- [x] Phase 4 — Specialized Model Explorer
+- [x] Phase 5 — ตรวจสอบโค้ดเบื้องต้นและเตรียมเผยแพร่
 
-## Current implementation
+## ระบบปัจจุบัน
 - Frontend: HTML, CSS, Vanilla JavaScript
-- Hosting target: GitHub Pages
-- Research source: Wikipedia API
-- Agent execution: deterministic, rule-based JavaScript workflow
-- Text analysis: browser-side heuristics
-- Storage: no conversation persistence in this MVP
-- Model Explorer: static curated model-family overview with official documentation links
+- Hosting: GitHub Pages
+- แหล่งค้นคว้าภายนอก: Wikipedia API
+- การทำงานของ Agent: JavaScript แบบ Rule-based และให้ผลลัพธ์ซ้ำได้เมื่อป้อนข้อมูลเดิม
+- การวิเคราะห์ข้อความ: Heuristics ใน Browser
+- การเก็บข้อมูล: ยังไม่มีระบบบันทึกประวัติการสนทนา
+- Model Explorer: รายการโมเดลเฉพาะทางแบบ Static พร้อมลิงก์เอกสารทางการ
 
-## QA performed
-- [x] `node --check` passed for `app.js`, `tools.js`, `data.js`, `models.js`
-- [x] Model catalogue smoke test: 6 categories; each has 2–3 entries
-- [x] Text-analysis smoke test returned keywords and selected points
-- [x] Static local-reference check: no missing local files referenced by the HTML pages
-- [ ] Browser interaction test on the actual GitHub Pages deployment
-- [ ] Live Wikipedia API test from the user's browser/network
-- [ ] Manual mobile/desktop visual review after deployment
-- [ ] Confirm copy/download behavior on the deployed HTTPS site
+## การตรวจสอบที่ทำแล้ว
+- [x] ตรวจ Syntax ของ `app.js`, `tools.js`, `data.js`, `models.js`
+- [x] ตรวจรายการโมเดล: 6 หมวด หมวดละ 2–3 รายการ
+- [x] ตรวจไฟล์ HTML ว่าไม่มีการอ้างอิงไฟล์ภายในที่หายไป
+- [x] ตรวจโครงสร้างไฟล์และลิงก์ Relative สำหรับ GitHub Pages
+- [ ] ทดสอบการโต้ตอบใน Browser บน GitHub Pages จริง
+- [ ] ทดสอบ Wikipedia API จาก Browser/เครือข่ายของผู้ใช้
+- [ ] ตรวจหน้าตาบนมือถือและ Desktop ด้วยตนเองหลัง Deploy
+- [ ] ยืนยันปุ่ม Copy/Download บน HTTPS ที่เผยแพร่จริง
 
-## Known limitations
-- Agent roles are not independent LLMs.
-- Reviewer checks structure only; it does not fact-check claims.
-- Wikipedia is the only live research source.
-- Model entries are broad model families, not exact version recommendations or rankings.
-- No backend, authentication, cloud sync, Tutor LLM, or conversation history.
+## ข้อจำกัดที่ทราบ
+- Agent แต่ละบทบาทยังไม่ใช่ LLM อิสระ
+- Reviewer ตรวจรูปแบบ ไม่ได้ตรวจสอบข้อเท็จจริงของเนื้อหา
+- Wikipedia เป็นแหล่งค้นคว้าภายนอกเพียงแหล่งเดียวในระบบปัจจุบัน
+- รายการ Model Explorer เป็นตัวอย่างโมเดลเฉพาะทาง ไม่ใช่การจัดอันดับหรือ Benchmark
+- ไม่มี Backend, ระบบสมาชิก, Cloud Sync, Tutor LLM หรือประวัติการสนทนา
 
-## Release checklist
-1. Extract the contents of this folder into the root of the GitHub repository.
-2. Commit and push to the branch configured for GitHub Pages.
-3. Confirm GitHub Pages is configured for the repository root.
-4. Test the deployed homepage, Model Explorer, Wikipedia search, export buttons, and anchor navigation.
+## รายการก่อนเผยแพร่
+1. แตกไฟล์ทั้งหมดในโฟลเดอร์นี้ไปไว้ที่ Root ของ GitHub Repository
+2. Commit และ Push ไปยัง Branch ที่ตั้งค่า GitHub Pages
+3. ตรวจว่า GitHub Pages ใช้ Repository Root (`/`) เป็นแหล่งเผยแพร่
+4. ทดสอบหน้าแรก, Model Explorer, Wikipedia Search, ปุ่ม Export และ Navigation Anchor
+5. เปิดลิงก์เอกสารทางการของโมเดลแต่ละรายการเพื่อตรวจชื่อรุ่นและสถานะการให้บริการก่อนนำเสนอ

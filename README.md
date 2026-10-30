@@ -1,51 +1,73 @@
 # Agent Loop Playground
 
-A focused, two-page learning demo that illustrates how a role-based agent workflow can organize a research-and-learning task.
+เว็บสาธิตแนวคิดการแบ่งงานให้ AI Agent แต่ละตัวรับผิดชอบคนละหน้าที่ เพื่อจัดการงานค้นคว้าและการเรียนรู้ โดยมีหน้าเว็บหลัก 2 หน้า และออกแบบให้เผยแพร่ผ่าน GitHub Pages ได้โดยตรง
 
-## Live demo
-Deploy this repository with GitHub Pages (Settings → Pages → Deploy from branch → `main` → `/ (root)`).
+## ทดลองใช้งานออนไลน์
 
-## Pages
-- `index.html` — Learning Assistant, Agent Workflow, study sheet output, and the Single AI vs Multi-Agent explainer.
-- `models.html` — AI Model Explorer with six task categories and a small curated set of model families.
-- `agents.html` — compatibility redirect to `models.html` for old links.
+สามารถเผยแพร่โปรเจกต์นี้ด้วย GitHub Pages ได้ที่  
+**Settings → Pages → Deploy from a branch → เลือก `main` → `/ (root)`**
 
-## How the demo works
-1. Planner extracts a topic and detects the language.
-2. Researcher searches and fetches an article introduction from Wikipedia's public API.
-3. Analyst applies deterministic, browser-side text heuristics.
-4. Writer assembles a Markdown study sheet.
-5. Reviewer checks basic structural criteria (minimum number of points/keywords and an HTTPS source URL).
+## ภายในเว็บไซต์มีอะไรบ้าง?
 
-**Important:** These are rule-based JavaScript workflow roles, not five independent LLMs. Wikipedia is the live external data source. Analysis, sheet generation, and review are deterministic browser logic. The Reviewer does not fact-check claims semantically. The comparison section is educational, not a measured benchmark.
+- `index.html` — หน้า Learning Assistant สำหรับส่งคำถาม ดูขั้นตอนการทำงานของ Agent รับชีทสรุป และอ่านส่วนเปรียบเทียบ Single AI กับ Multi-Agent
+- `models.html` — หน้า Model Explorer สำหรับสำรวจโมเดลเฉพาะทาง 6 หมวด เช่น Coding, Image Generation, Audio, Search & Research, Embeddings และ Vision/Document
+- `agents.html` — หน้าเปลี่ยนเส้นทางเพื่อรองรับลิงก์เก่าที่เคยชี้มาหน้า Agents
 
-## Run locally
-Use a local static server (recommended):
+## ระบบสาธิตทำงานอย่างไร?
+
+1. **Planner** อ่านคำถาม แยกหัวข้อ และตรวจจับภาษา
+2. **Researcher** ค้นหาและดึงบทนำของบทความจาก Wikipedia Public API
+3. **Analyst** วิเคราะห์ข้อความด้วยกฎและ heuristic ที่ทำงานใน Browser
+4. **Writer** จัดเนื้อหาเป็นชีทสรุป Markdown
+5. **Reviewer** ตรวจรูปแบบพื้นฐาน เช่น จำนวนประเด็น คำสำคัญ และ URL อ้างอิงแบบ HTTPS
+
+### ข้อสำคัญเกี่ยวกับความสามารถจริง
+
+Agent ทั้ง 5 บทบาทในเวอร์ชันนี้เป็นขั้นตอนการทำงานที่เขียนด้วย JavaScript แบบ Rule-based ไม่ใช่ LLM 5 ตัวที่สนทนาหรือทำงานอิสระร่วมกัน
+
+- แหล่งข้อมูลภายนอกที่เรียกใช้งานจริงคือ Wikipedia API
+- การวิเคราะห์ การเรียบเรียงชีท และการตรวจรูปแบบ ทำงานด้วย Logic ใน Browser
+- Reviewer ตรวจโครงสร้างเบื้องต้น ไม่ได้ตรวจสอบความจริงของเนื้อหาเชิงความหมาย
+- ส่วนเปรียบเทียบ Single AI vs Multi-Agent เป็นเนื้อหาเพื่อการเรียนรู้ ไม่ใช่ผลการทดลอง Benchmark
+
+## วิธีเปิดใช้งานบนเครื่องตัวเอง
+
+แนะนำให้เปิดผ่าน Local Static Server แทนการดับเบิลคลิกไฟล์ HTML
+
 ```bash
 python3 -m http.server 8000
 ```
-Then open `http://localhost:8000`.
 
-No build step or package installation is required.
+จากนั้นเปิด `http://localhost:8000`
 
-## Files
-- `index.html`, `models.html` — two main pages
-- `style.css` — design system and responsive layout
-- `app.js` — Learning Assistant UI and workflow
-- `tools.js` — Wikipedia API and local text analysis
-- `data.js` — Agent definitions and model-family catalogue
-- `models.js` — Model Explorer rendering
-- `docs/` — phase-by-phase planning and implementation reports
+ไม่ต้องติดตั้ง Package และไม่มีขั้นตอน Build
 
-## Limitations
-- Wikipedia is the only live research source.
-- Search and extract availability depend on the external API and network.
-- Text analysis uses heuristics and is not equivalent to an LLM summary.
-- Model Explorer describes model families, not a live model ranking, benchmark, or price comparison. Check official documentation for current model versions and capabilities.
-- No backend, authentication, cloud sync, conversation history, or real LLM provider is included.
-- No API keys or secrets are required in the frontend.
+## โครงสร้างไฟล์
 
-## Future development
-Possible next steps include adding approved research providers, real server-side LLM adapters, conversation persistence, a fact-checking reviewer, and controlled Single AI vs Multi-Agent evaluations using a shared task set and transparent metrics.
+- `index.html`, `models.html` — หน้าเว็บหลัก 2 หน้า
+- `style.css` — สี ฟอนต์ Layout การ์ด และการแสดงผลแบบ Responsive
+- `app.js` — การทำงานของหน้า Learning Assistant และ Workflow
+- `tools.js` — การเรียก Wikipedia API และเครื่องมือวิเคราะห์ข้อความในเครื่อง
+- `data.js` — ข้อมูลบทบาท Agent และรายการโมเดล
+- `models.js` — การสร้างการ์ดและเมนูหมวดหมู่ของ Model Explorer
+- `docs/` — เอกสารอธิบายงานในแต่ละ Phase
+- `PROJECT_PLAN.md` — แผนโครงการและแนวทางพัฒนาต่อ
+- `PROJECT_STATUS.md` — สถานะการทำงานและรายการตรวจสอบก่อนเผยแพร่
 
-See `PROJECT_PLAN.md` and `docs/PHASE-*.md` for the roadmap and implementation notes.
+## ข้อจำกัดของเวอร์ชันนี้
+
+- Wikipedia เป็นแหล่งค้นคว้าภายนอกเพียงแหล่งเดียวในระบบปัจจุบัน
+- การค้นหาและดึงข้อมูลขึ้นกับการให้บริการของ API และเครือข่าย
+- การวิเคราะห์ข้อความใช้กฎและ heuristic ไม่เทียบเท่าการสรุปโดย LLM
+- Model Explorer เป็นรายการตัวอย่างโมเดลเฉพาะทางที่คัดเลือกไว้ ไม่ใช่การจัดอันดับแบบเรียลไทม์
+- ชื่อรุ่น ความสามารถ ราคา และ License ของโมเดลอาจเปลี่ยนแปลง ควรตรวจเอกสารทางการก่อนใช้งานจริง
+- ยังไม่มี Backend, ระบบสมาชิก, Cloud Sync, ประวัติการสนทนา หรือ LLM Provider จริง
+- Frontend ไม่ต้องใช้ API Key หรือ Secret
+
+## แนวทางพัฒนาต่อในอนาคต
+
+สามารถเพิ่มแหล่งค้นคว้าอื่น เพิ่ม LLM Provider ผ่าน Backend เพิ่มระบบบันทึกประวัติการสนทนา และพัฒนา Reviewer ให้ตรวจสอบข้อกล่าวอ้างกับแหล่งข้อมูลได้
+
+หากต้องการพิสูจน์ว่า Single AI หรือ Multi-Agent เหมาะกับงานใดมากกว่า ควรออกแบบชุดโจทย์เดียวกัน เกณฑ์ประเมินที่โปร่งใส และวัดคุณภาพ เวลา รวมถึงต้นทุนจริงก่อนสรุปผล
+
+อ่านรายละเอียดเพิ่มเติมได้จาก `PROJECT_PLAN.md` และไฟล์ `docs/PHASE-*.md`

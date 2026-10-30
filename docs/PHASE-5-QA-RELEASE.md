@@ -1,28 +1,29 @@
-# Phase 5 — QA & GitHub Pages Readiness
+# Phase 5 — ตรวจสอบคุณภาพและเตรียมเผยแพร่บน GitHub Pages
 
-## Static checks completed
-- HTML pages reference local CSS and JavaScript files using relative paths.
-- Scripts are loaded after page markup.
-- No package manager, bundler, or build step is required.
-- No API keys or secrets are included.
-- `agents.html` preserves old inbound links through redirect.
-- Main page has mobile breakpoints and reduced-motion support.
-- External links use `target="_blank"` with `rel="noopener noreferrer"`.
+## การตรวจสอบแบบ Static ที่ทำแล้ว
+- หน้า HTML อ้างอิงไฟล์ CSS และ JavaScript ภายในด้วย Relative Paths
+- โหลด Script หลัง Markup ของหน้าเว็บ
+- ไม่ต้องใช้ Package Manager, Bundler หรือ Build Step
+- ไม่มี API Key หรือ Secret ในโปรเจกต์
+- `agents.html` รองรับลิงก์เดิมด้วยการเปลี่ยนเส้นทาง
+- หน้าเว็บมี Breakpoints สำหรับมือถือและรองรับ Reduced Motion
+- ลิงก์ภายนอกเปิดแท็บใหม่พร้อม `rel="noopener noreferrer"`
 
-## Manual tests still required in a real browser
-- Submit Thai and English topics.
-- Confirm Wikipedia search and extract requests succeed.
-- Test no-result and offline/network-failure states.
-- Test copy/download actions on HTTPS GitHub Pages.
-- Check navigation anchors on both pages.
-- Inspect mobile and desktop layouts.
-- Check browser console and network panel.
+## การทดสอบด้วย Browser ที่ยังต้องทำจริง
+- ส่งหัวข้อภาษาไทยและภาษาอังกฤษ
+- ตรวจว่า Wikipedia Search และ Extract สำเร็จ
+- ทดสอบกรณีไม่พบผลลัพธ์และเครือข่ายล้มเหลว
+- ทดสอบ Copy/Download บน GitHub Pages ผ่าน HTTPS
+- ทดสอบ Navigation Anchor จากทั้งสองหน้า
+- ตรวจ Layout บนมือถือและ Desktop
+- ตรวจ Browser Console และ Network Panel
+- เปิดตรวจลิงก์เอกสารทางการของโมเดลใน Model Explorer
 
-## Release instructions
-1. Extract the project folder contents into the root of the GitHub repository.
-2. Commit and push to the branch configured for GitHub Pages.
-3. In repository Settings → Pages, select `main` and `/ (root)` if not already configured.
-4. Wait for GitHub Pages deployment and test the published URL.
+## วิธีเผยแพร่
+1. แตกไฟล์ทั้งหมดในโฟลเดอร์โปรเจกต์ไปไว้ที่ Root ของ GitHub Repository
+2. Commit และ Push ไปยัง Branch ที่ตั้งค่า GitHub Pages
+3. ใน Repository Settings → Pages เลือก `main` และ `/ (root)` หากยังไม่ได้ตั้งค่า
+4. รอ GitHub Pages Deploy แล้วทดสอบ URL ที่เผยแพร่
 
-## QA honesty
-Automated static checks do not replace browser testing. No claim is made that the live GitHub Pages deployment has been tested from this environment.
+## ความซื่อตรงของผล QA
+การตรวจแบบ Static ไม่สามารถแทนการทดสอบใน Browser ได้ จึงยังไม่อ้างว่าได้ทดสอบเว็บไซต์ GitHub Pages จริงจากสภาพแวดล้อมนี้แล้ว

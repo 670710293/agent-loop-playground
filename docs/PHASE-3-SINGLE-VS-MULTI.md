@@ -1,14 +1,14 @@
-# Phase 3 — Single AI vs Multi-Agent
+# Phase 3 — เปรียบเทียบ Single AI กับ Multi-Agent
 
-## Implemented
-- Added an educational comparison section below the main Learning Assistant area.
-- Added a navigation anchor that scrolls to the comparison section.
-- Used two columns on wider screens and a single-column layout on smaller screens.
-- Explained the Single AI flow and the role-separated Multi-Agent workflow.
-- Included trade-offs: simplicity, task decomposition, reviewability, latency, resource use, and complexity.
+## สิ่งที่จัดทำ
+- เพิ่มส่วนเปรียบเทียบเพื่อการเรียนรู้ไว้ใต้พื้นที่หลักของ Learning Assistant
+- เพิ่มลิงก์บน Navigation เพื่อเลื่อนไปยังส่วนเปรียบเทียบ
+- ใช้ Layout สองคอลัมน์บนหน้าจอกว้าง และหนึ่งคอลัมน์บนหน้าจอเล็ก
+- อธิบายการทำงานของ Single AI และ Workflow ที่แบ่งหน้าที่ให้ Multi-Agent
+- แสดงข้อแลกเปลี่ยน เช่น ความเรียบง่าย การแบ่งงาน การตรวจสอบย้อนกลับ เวลา ทรัพยากร และความซับซ้อน
 
-## Product messaging
-Multi-Agent is not presented as universally superior. The page states that a simple single-model workflow can be better for simple tasks, while role separation may help structure multi-step tasks.
+## แนวทางการสื่อสาร
+ไม่แสดงว่า Multi-Agent เหนือกว่าในทุกกรณี งานง่าย ๆ อาจเหมาะกับ Single AI เพราะเรียบง่ายกว่า ส่วนงานหลายขั้นตอนอาจได้ประโยชน์จากการแยกบทบาท
 
-## Measurement status
-This is conceptual education, not a benchmark. No fake accuracy, speed, cost, or quality scores are displayed.
+## สถานะการวัดผล
+เนื้อหานี้เป็นการอธิบายแนวคิด ไม่ใช่ Benchmark ไม่มีการแสดงคะแนนความแม่นยำ ความเร็ว ต้นทุน หรือคุณภาพที่ไม่ได้วัดจริง

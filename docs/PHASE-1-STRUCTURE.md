@@ -1,19 +1,19 @@
-# Phase 1 — Navigation & Page Structure
+# Phase 1 — Navigation และโครงสร้างหน้าเว็บ
 
-## Implemented
-- Main navigation now exposes only Learning Assistant and Model Explorer.
-- Added a third lightweight navigation anchor: “ทำไมต้อง Multi-Agent?” which scrolls to the comparison section on the homepage.
-- Added `models.html` as the dedicated Model Explorer page.
-- Kept `agents.html` as a compatibility redirect to `models.html`.
-- Preserved original font choices and the visual language of cards, rounded controls, workflow stepper, and accent color.
-- Kept all files at repository root for GitHub Pages root deployment.
+## สิ่งที่จัดทำ
+- Navigation หลักมีเพียง Learning Assistant และ Model Explorer
+- เพิ่มลิงก์ “ทำไมต้อง Multi-Agent?” เพื่อเลื่อนลงไปยังส่วนเปรียบเทียบในหน้าแรก
+- เพิ่ม `models.html` เป็นหน้า Model Explorer โดยเฉพาะ
+- คง `agents.html` เป็นหน้าเปลี่ยนเส้นทางเพื่อรองรับลิงก์เก่า
+- รักษาฟอนต์เดิม รูปแบบการ์ด ปุ่มมุมโค้ง Workflow Stepper และสี Accent
+- เก็บไฟล์ไว้ที่ Root ของ Repository เพื่อให้ GitHub Pages ใช้งานได้
 
-## Files
-- Updated: `index.html`, `style.css`
-- Added: `models.html`, `models.js`
-- Compatibility: `agents.html`
+## ไฟล์ที่เกี่ยวข้อง
+- ปรับปรุง: `index.html`, `style.css`
+- เพิ่ม: `models.html`, `models.js`
+- รองรับลิงก์เดิม: `agents.html`
 
-## Acceptance
-- Two primary destinations only.
-- No client-side router or build step.
-- All navigation uses relative paths or in-page anchors.
+## เกณฑ์ตรวจรับ
+- มีปลายทางหลักเพียง 2 หน้า
+- ไม่ใช้ Client-side Router หรือ Build Step
+- Navigation ใช้ Relative Paths หรือลิงก์ Anchor ภายในหน้า

@@ -1,35 +1,35 @@
-# Phase 0 — Project Audit & Architecture
+# Phase 0 — ตรวจสอบโปรเจกต์และวางสถาปัตยกรรม
 
-## Input inspected
-Original ZIP: `agent-loop-playground-v5.zip`.
+## ไฟล์ต้นฉบับที่ตรวจสอบ
+ZIP ต้นฉบับ: `agent-loop-playground-v5.zip`
 
-Files found:
+ไฟล์ที่พบ:
 - `index.html`, `agents.html`
 - `style.css`
 - `app.js`, `agents.js`, `tools.js`, `data.js`
 - `README.md`, `.gitignore`
 
-## Findings
-- The original site is a static HTML/CSS/JavaScript project with no build step.
-- `index.html` already contains a working prompt flow, a five-step agent visualization, a trace panel, a study sheet, and Markdown export.
-- `tools.js` calls Wikipedia's public API and performs browser-side deterministic text analysis.
-- `agents.html` combines agent descriptions and a small model catalogue in tabs.
-- The original visual language uses Bricolage Grotesque, IBM Plex Sans Thai, purple accent, rounded cards, and a horizontal workflow stepper.
-- Agent logic is rule-based. It does not call independent LLMs.
-- The original Model catalogue describes broad model/provider families, not measured rankings.
+## ผลการตรวจสอบ
+- โปรเจกต์เดิมเป็น Static Website ที่ใช้ HTML/CSS/JavaScript ไม่มีขั้นตอน Build
+- `index.html` มีช่องรับคำถาม Workflow 5 ขั้นตอน แผงแสดงรายละเอียด ชีทสรุป และ Export Markdown อยู่แล้ว
+- `tools.js` เรียก Wikipedia Public API และวิเคราะห์ข้อความด้วยกฎที่ทำงานใน Browser
+- `agents.html` รวมคำอธิบาย Agent และรายการโมเดลไว้ในแท็บเดียวกัน
+- รูปแบบเดิมใช้ฟอนต์ Bricolage Grotesque, IBM Plex Sans Thai, สีม่วง การ์ดมุมโค้ง และ Workflow Stepper
+- Logic ของ Agent เป็น Rule-based ไม่ได้เรียก LLM หลายตัวอย่างอิสระ
+- Model Catalog เดิมเป็นภาพรวมตระกูลโมเดล/ผู้พัฒนา ไม่ใช่ผลจัดอันดับจากการทดสอบ
 
-## Architecture decision
-Keep the static architecture and visual identity. Use two main pages:
-1. `index.html`: Learning Assistant + Single AI vs Multi-Agent explainer.
-2. `models.html`: Model Explorer.
+## ข้อตัดสินใจด้านสถาปัตยกรรม
+คงโครงสร้าง Static Website และเอกลักษณ์ด้านภาพไว้ โดยจัดเป็น 2 หน้าหลัก:
+1. `index.html`: Learning Assistant และคำอธิบาย Single AI vs Multi-Agent
+2. `models.html`: Model Explorer
 
-Retain `agents.html` as a compatibility redirect for old links. Reuse and improve existing `app.js`, `tools.js`, `data.js`, and `style.css`; add `models.js`.
+คง `agents.html` ไว้เพื่อเปลี่ยนเส้นทางจากลิงก์เก่า นำ `app.js`, `tools.js`, `data.js`, `style.css` เดิมมาต่อยอด และใช้ `models.js` สำหรับหน้า Model Explorer
 
-## Risks
-- Wikipedia API availability and CORS/network conditions are external dependencies.
-- Thai tokenization quality depends on browser support for `Intl.Segmenter`.
-- Browser-side heuristic summarization is not semantic fact-checking.
-- Model capabilities can change; official docs must be checked before making version-specific claims.
+## ความเสี่ยง
+- Wikipedia API และ CORS/เครือข่ายเป็นบริการภายนอก
+- คุณภาพการตัดคำภาษาไทยขึ้นกับการรองรับ `Intl.Segmenter` ของ Browser
+- การสรุปด้วย Heuristics ไม่ใช่การตรวจสอบข้อเท็จจริงเชิงความหมาย
+- ความสามารถโมเดลเปลี่ยนแปลงได้ ต้องตรวจเอกสารทางการก่อนระบุความสามารถเฉพาะรุ่น
 
-## Phase 0 outcome
-Audit completed. The implementation proceeds without introducing a framework, build tool, backend, API key, or new runtime dependency.
+## ผลลัพธ์ Phase 0
+ตรวจสอบและกำหนดแนวทางแล้ว โดยไม่เพิ่ม Framework, Build Tool, Backend, API Key หรือ Runtime Dependency ใหม่

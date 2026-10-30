@@ -9,29 +9,64 @@ const AGENTS = [
 ];
 
 const MODEL_CATEGORIES = [
-  { id: "learning", title: "Learning & Research", description: "อธิบายแนวคิด สังเคราะห์ความรู้ และช่วยค้นคว้า", models: [
-    { name: "Claude models", provider: "Anthropic", fit: "อ่านและอธิบายเนื้อหายาว รวมถึงช่วยเรียบเรียงแนวคิด", strengths: ["เหมาะกับการทำงานกับข้อความและเอกสาร", "ใช้ช่วยสรุปและอธิบายแนวคิดได้"], caveat: "ตรวจสอบข้อเท็จจริงและแหล่งอ้างอิงแยกต่างหาก", url: "https://docs.anthropic.com/" },
-    { name: "Gemini models", provider: "Google", fit: "เรียนรู้จากข้อความและงานที่ต้องใช้ความสามารถหลายรูปแบบ", strengths: ["มีตระกูลโมเดลหลายระดับ", "รองรับงาน multimodal ในรุ่นที่กำหนด"], caveat: "ความสามารถขึ้นกับรุ่นและผลิตภัณฑ์ที่เลือก", url: "https://ai.google.dev/gemini-api/docs/models" }
-  ]},
-  { id: "general", title: "General Chat", description: "สนทนาทั่วไป ช่วยคิด และทำงานประจำวัน", models: [
-    { name: "GPT models", provider: "OpenAI", fit: "ถามตอบทั่วไป ระดมความคิด และทำงานหลายรูปแบบ", strengths: ["มีโมเดลหลายระดับให้เลือก", "มีเอกสาร API และเครื่องมือสำหรับนักพัฒนา"], caveat: "ความสามารถและราคาแตกต่างกันตามรุ่นและแพ็กเกจ", url: "https://platform.openai.com/docs/models" },
-    { name: "Claude models", provider: "Anthropic", fit: "สนทนาและช่วยจัดการงานที่มีบริบทยาว", strengths: ["เหมาะกับการทำงานกับข้อความ", "มีตัวเลือกหลายระดับประสิทธิภาพ"], caveat: "ควรตรวจข้อจำกัดของรุ่นที่ใช้งาน", url: "https://docs.anthropic.com/" }
-  ]},
-  { id: "coding", title: "Coding & Development", description: "ช่วยเขียนโค้ด อธิบาย Debug และทำความเข้าใจโปรเจกต์", models: [
-    { name: "GPT models", provider: "OpenAI", fit: "ช่วยเขียนโค้ด อธิบายปัญหา และใช้เครื่องมือพัฒนา", strengths: ["มีเอกสาร API สำหรับเชื่อมเข้ากับ workflow", "รองรับงาน coding หลายลักษณะตามรุ่น"], caveat: "ต้องรันทดสอบโค้ดจริงก่อนนำไปใช้", url: "https://platform.openai.com/docs/models" },
-    { name: "Claude models", provider: "Anthropic", fit: "อธิบายโค้ดและช่วยทำงานกับไฟล์หรือโปรเจกต์", strengths: ["เหมาะกับการอ่านและแก้ไขข้อความ/โค้ด", "มีเครื่องมือสำหรับ coding workflow"], caveat: "ผลลัพธ์อาจผิดพลาด ต้องตรวจ diff และทดสอบ", url: "https://docs.anthropic.com/" },
-    { name: "Qwen models", provider: "Qwen / Alibaba", fit: "เป็นอีกตระกูลโมเดลที่มีตัวเลือกด้านการเขียนโค้ด", strengths: ["มีโมเดลหลายขนาดและตัวเลือกแบบเปิด", "เหมาะสำหรับผู้ที่ต้องการทดลอง self-hosting บางรุ่น"], caveat: "การติดตั้งและทรัพยากรขึ้นกับรุ่นที่เลือก", url: "https://qwen.readthedocs.io/" }
-  ]},
-  { id: "data", title: "Data Analysis", description: "ช่วยทำความเข้าใจข้อมูล ตาราง และวางแผนการวิเคราะห์", models: [
-    { name: "GPT models", provider: "OpenAI", fit: "ช่วยเขียน Python/SQL และวางแผนวิเคราะห์ข้อมูล", strengths: ["ช่วยอธิบายขั้นตอนวิเคราะห์", "เชื่อมกับเครื่องมือได้ตามสภาพแวดล้อม"], caveat: "ควรใช้โค้ดหรือเครื่องมือคำนวณตรวจตัวเลข", url: "https://platform.openai.com/docs/models" },
-    { name: "Gemini models", provider: "Google", fit: "ช่วยวิเคราะห์โจทย์ข้อมูลและทำงานกับอินพุตหลายรูปแบบ", strengths: ["มีตัวเลือกโมเดลหลายระดับ", "มีเอกสารสำหรับนักพัฒนา"], caveat: "การจัดการไฟล์และขนาดข้อมูลขึ้นกับรุ่น/แอป", url: "https://ai.google.dev/gemini-api/docs/models" }
-  ]},
-  { id: "long-context", title: "Long Context & Documents", description: "อ่านเอกสารยาว สรุปเนื้อหา และค้นประเด็นจากหลายส่วน", models: [
-    { name: "Gemini models", provider: "Google", fit: "พิจารณาเมื่อโจทย์ต้องใช้ context ยาวหรือสื่อหลายรูปแบบ", strengths: ["บางรุ่นมี context window ขนาดใหญ่", "มีเอกสารระบุขีดจำกัดตามรุ่น"], caveat: "ตรวจ context limit ของรุ่นที่ใช้งานจริง", url: "https://ai.google.dev/gemini-api/docs/models" },
-    { name: "Claude models", provider: "Anthropic", fit: "ทำงานกับเอกสารและบริบทยาว", strengths: ["เหมาะกับการอ่านและสังเคราะห์ข้อความ", "มีเอกสารอธิบายรุ่นและข้อจำกัด"], caveat: "context window และความพร้อมใช้งานขึ้นกับรุ่น", url: "https://docs.anthropic.com/" }
-  ]},
-  { id: "creative", title: "Creative & Multimodal", description: "สร้างสรรค์เนื้อหาและทำงานกับภาพ เสียง หรือสื่อหลายรูปแบบ", models: [
-    { name: "GPT models", provider: "OpenAI", fit: "งานสร้างสรรค์และงานที่ผสมข้อความกับสื่ออื่น", strengths: ["มีโมเดลและผลิตภัณฑ์หลายรูปแบบ", "ความสามารถ multimodal ขึ้นกับรุ่น"], caveat: "ตรวจว่ารุ่นและ API ที่เลือกเปิด modality ที่ต้องการ", url: "https://platform.openai.com/docs/models" },
-    { name: "Gemini models", provider: "Google", fit: "งานที่ต้องรับอินพุตหลายรูปแบบและสร้างผลลัพธ์ตามรุ่น", strengths: ["มีตระกูลโมเดล multimodal", "มีเอกสาร API สำหรับทดลอง"], caveat: "ฟีเจอร์ที่รองรับต่างกันในแต่ละรุ่น", url: "https://ai.google.dev/gemini-api/docs/models" }
-  ]}
+  {
+    id: "coding",
+    title: "Coding & Software Engineering",
+    description: "โมเดลที่เน้นการเขียนโค้ด แก้บั๊ก ทำความเข้าใจ Repository และช่วยทำงานพัฒนาซอฟต์แวร์",
+    models: [
+      { name: "Qwen3-Coder", provider: "Alibaba / Qwen", fit: "เหมาะกับงานเขียนโค้ดแบบหลายขั้นตอน การแก้ไขโค้ด และงานที่ต้องเข้าใจบริบทของโปรเจกต์", strengths: ["ออกแบบมาเพื่องาน Coding และ Agentic Coding", "มีตัวเลือกโมเดลแบบ Open-weight ในตระกูล"], caveat: "ประสิทธิภาพและเงื่อนไขการใช้งานขึ้นกับรุ่นย่อย ควรตรวจ License และทดสอบกับงานจริง", url: "https://qwenlm.github.io/blog/qwen3-coder/", access: "Open-weight / Hosted options" },
+      { name: "DeepSeek-Coder", provider: "DeepSeek", fit: "เหมาะกับการสร้างโค้ด เติมโค้ด อธิบายโค้ด และงานเขียนโปรแกรม", strengths: ["มีตระกูลโมเดลที่พัฒนามาเพื่องาน Coding โดยตรง", "มีโครงการ Open-weight ให้ศึกษาและนำไปทดลอง"], caveat: "ตรวจรุ่นและสถานะการดูแลของแต่ละ checkpoint ก่อนเลือกใช้ในโปรเจกต์", url: "https://github.com/deepseek-ai/DeepSeek-Coder-V2", access: "Open-weight / API options" },
+      { name: "Codestral", provider: "Mistral AI", fit: "เหมาะกับงานสร้างและเติมโค้ด โดยเฉพาะ workflow ที่ใช้ Code Completion", strengths: ["เป็นโมเดลที่เน้นงานเขียนโปรแกรม", "มีเอกสารสำหรับการใช้งานผ่าน API"], caveat: "เงื่อนไข License และการเข้าถึงอาจแตกต่างกันตามรุ่นและช่องทาง", url: "https://docs.mistral.ai/capabilities/code_generation/", access: "Hosted API / รุ่นที่มีเงื่อนไขเฉพาะ" }
+    ]
+  },
+  {
+    id: "image-generation",
+    title: "Image Generation & Editing",
+    description: "โมเดลสร้างภาพจากข้อความ แก้ไขภาพ และสร้างภาพโดยอ้างอิงภาพต้นฉบับ",
+    models: [
+      { name: "FLUX.2", provider: "Black Forest Labs", fit: "เหมาะกับการสร้างภาพและงานแก้ไขภาพที่ต้องควบคุมรายละเอียด", strengths: ["เป็นตระกูลโมเดลที่เน้น Image Generation", "มีเอกสารแยกสำหรับการสร้างและแก้ไขภาพ"], caveat: "รุ่นย่อยและช่องทางให้บริการอาจมีข้อจำกัดต่างกัน ตรวจ License ก่อนใช้งานเชิงพาณิชย์", url: "https://docs.bfl.ai/flux_2/overview", access: "API / รุ่น Open-weight บางรายการ" },
+      { name: "GPT Image", provider: "OpenAI", fit: "เหมาะกับการสร้างภาพจากคำสั่งภาษาและการแก้ไขภาพผ่าน API", strengths: ["รองรับการสร้างภาพและงานแก้ไขตามความสามารถของรุ่น", "มีคู่มือ API และตัวอย่างการใช้งาน"], caveat: "ตรวจรุ่นที่เปิดให้ใช้ ข้อจำกัดการสร้างภาพ และนโยบายเนื้อหาก่อนใช้งาน", url: "https://platform.openai.com/docs/guides/image-generation", access: "Hosted API" },
+      { name: "Imagen", provider: "Google", fit: "เหมาะกับการสร้างภาพจากข้อความผ่านบริการของ Google Cloud", strengths: ["เป็นตระกูลโมเดลสร้างภาพโดยเฉพาะ", "มีเอกสารการใช้งานผ่าน Vertex AI"], caveat: "รุ่นที่ให้บริการ ภูมิภาค และสิทธิ์เข้าถึงอาจแตกต่างกัน", url: "https://cloud.google.com/vertex-ai/generative-ai/docs/image/overview", access: "Hosted API / Cloud service" }
+    ]
+  },
+  {
+    id: "audio",
+    title: "Audio & Speech",
+    description: "โมเดลแปลงเสียงเป็นข้อความ (Speech-to-Text) และสร้างเสียงพูด (Text-to-Speech)",
+    models: [
+      { name: "Whisper", provider: "OpenAI", fit: "เหมาะกับการถอดเสียงพูดเป็นข้อความและงานรู้จำเสียง", strengths: ["เป็นโมเดล Speech Recognition โดยเฉพาะ", "มีโครงการ Open-source ให้ติดตั้งและทดลอง"], caveat: "คุณภาพขึ้นกับภาษา สำเนียง เสียงรบกวน และการตั้งค่าการถอดเสียง", url: "https://github.com/openai/whisper", access: "Open-source" },
+      { name: "Scribe", provider: "ElevenLabs", fit: "เหมาะกับการถอดเสียงและแปลงเสียงพูดเป็นข้อความ", strengths: ["ออกแบบมาสำหรับ Speech-to-Text", "มีเอกสาร API และความสามารถด้านการถอดเสียง"], caveat: "ตรวจภาษาที่รองรับ ราคา และข้อจำกัดการใช้งานในเอกสารปัจจุบัน", url: "https://elevenlabs.io/docs/models/speech-to-text", access: "Hosted API" },
+      { name: "ElevenLabs Text to Speech", provider: "ElevenLabs", fit: "เหมาะกับการสร้างเสียงพูดจากข้อความและงาน Voice Generation", strengths: ["เน้นการสังเคราะห์เสียงพูด", "มีตัวเลือกเสียงและการตั้งค่าตามบริการ"], caveat: "เสียงที่ได้และสิทธิ์นำไปใช้ขึ้นกับ Voice, Plan และเงื่อนไขของบริการ", url: "https://elevenlabs.io/docs/models", access: "Hosted API" }
+    ]
+  },
+  {
+    id: "search-research",
+    title: "Search & Research",
+    description: "โมเดลหรือบริการที่ออกแบบให้ตอบคำถามโดยเชื่อมโยงกับการค้นเว็บและข้อมูลอ้างอิง",
+    models: [
+      { name: "Sonar", provider: "Perplexity", fit: "เหมาะกับคำถามที่ต้องค้นข้อมูลเว็บและสังเคราะห์คำตอบพร้อมแหล่งอ้างอิง", strengths: ["ออกแบบมาสำหรับงานตอบคำถามที่เชื่อมกับการค้นหา", "มี API และเอกสารอธิบายตระกูลโมเดล"], caveat: "การอ้างอิงไม่ได้รับประกันว่าทุกข้อความถูกต้อง ควรเปิดตรวจแหล่งต้นทาง", url: "https://docs.perplexity.ai/guides/model-cards", access: "Hosted API" },
+      { name: "Gemini with Google Search Grounding", provider: "Google", fit: "เหมาะกับงานถามตอบที่ต้องใช้ข้อมูลเว็บประกอบผ่าน Search Grounding", strengths: ["เชื่อมการตอบของโมเดลกับผลค้นหาจาก Google Search ได้ในรุ่นที่รองรับ", "มีเอกสารอธิบายการเปิดใช้ Grounding"], caveat: "เป็นความสามารถของโมเดลร่วมกับเครื่องมือค้นหา ไม่ใช่โมเดลค้นหาอิสระทุกกรณี", url: "https://ai.google.dev/gemini-api/docs/google-search", access: "Hosted API / feature availability varies" },
+      { name: "Grok with Web Search", provider: "xAI", fit: "เหมาะกับ workflow ที่ต้องให้โมเดลค้นเว็บเพื่อประกอบคำตอบ", strengths: ["มีเครื่องมือค้นหาให้เรียกใช้ใน API ตามรุ่นที่รองรับ", "เหมาะกับการทดลอง agent ที่ใช้ข้อมูลเว็บ"], caveat: "ความสามารถค้นหาเป็นเครื่องมือประกอบการเรียกโมเดล ควรตรวจแหล่งอ้างอิงเอง", url: "https://docs.x.ai/docs/guides/tools/search-tools", access: "Hosted API / tool-dependent" }
+    ]
+  },
+  {
+    id: "embeddings-reranking",
+    title: "Embeddings & Reranking",
+    description: "โมเดลเบื้องหลัง Semantic Search และ RAG ใช้แปลงข้อความเป็นเวกเตอร์หรือจัดอันดับผลค้นหา",
+    models: [
+      { name: "Embed + Rerank", provider: "Cohere", fit: "เหมาะกับระบบค้นคืนเอกสาร โดยใช้ Embeddings ค้นหาผู้สมัครและ Rerank จัดลำดับใหม่", strengths: ["มีโมเดลเฉพาะสำหรับ Embedding และ Reranking", "มีเอกสารสำหรับประกอบระบบ Retrieval/RAG"], caveat: "Embedding และ Reranking ทำหน้าที่ต่างกัน ต้องเลือกให้ตรงขั้นตอนของระบบ", url: "https://docs.cohere.com/docs/models", access: "Hosted API" },
+      { name: "BGE-M3 & BGE Reranker", provider: "BAAI / FlagEmbedding", fit: "เหมาะกับผู้พัฒนาที่ต้องการทดลอง Semantic Retrieval และ Reranking ด้วยโมเดล Open-weight", strengths: ["มีโมเดล Embedding และ Reranker ใน ecosystem เดียวกัน", "สามารถนำไปทดลองติดตั้งในระบบของตนเองได้"], caveat: "ต้องประเมินคุณภาพกับชุดข้อมูลและภาษาที่ใช้งานจริง รวมถึงทรัพยากรเครื่อง", url: "https://huggingface.co/BAAI/bge-m3", access: "Open-weight" },
+      { name: "Embedding Models", provider: "OpenAI", fit: "เหมาะกับการแปลงข้อความเป็นเวกเตอร์เพื่อใช้ค้นหาความหมายและจัดกลุ่ม", strengths: ["มี API สำหรับสร้าง Embeddings", "นำไปใช้เป็นส่วนหนึ่งของ Semantic Search และ RAG ได้"], caveat: "เป็นโมเดล Embedding ไม่ใช่โมเดลสร้างคำตอบหรือ Reranker โดยตรง", url: "https://platform.openai.com/docs/guides/embeddings", access: "Hosted API" }
+    ]
+  },
+  {
+    id: "vision-documents",
+    title: "Vision & Document Understanding",
+    description: "โมเดลอ่านภาพ เอกสาร ตาราง และดึงข้อมูลจากเนื้อหาที่ไม่ใช่ข้อความธรรมดา",
+    models: [
+      { name: "Qwen3-VL", provider: "Alibaba / Qwen", fit: "เหมาะกับการทำความเข้าใจภาพและข้อมูลภาพร่วมกับข้อความ", strengths: ["เป็นตระกูล Vision-Language โดยเฉพาะ", "มีตัวเลือกและเอกสารสำหรับนักพัฒนา"], caveat: "ความสามารถด้านภาพและวิดีโอขึ้นกับรุ่นย่อยและวิธี deploy", url: "https://qwenlm.github.io/blog/qwen3-vl/", access: "Open-weight / Hosted options" },
+      { name: "Mistral OCR", provider: "Mistral AI", fit: "เหมาะกับการดึงข้อความและโครงสร้างจากเอกสาร เช่น PDF", strengths: ["เน้นงาน OCR และ Document Processing", "มี API สำหรับประมวลผลเอกสาร"], caveat: "ควรตรวจผล OCR กับเอกสารจริง โดยเฉพาะตาราง ภาษาไทย และเอกสารสแกนคุณภาพต่ำ", url: "https://docs.mistral.ai/capabilities/document/", access: "Hosted API" },
+      { name: "PaddleOCR", provider: "PaddlePaddle", fit: "เหมาะกับงาน OCR และการดึงข้อความจากภาพหรือเอกสารในระบบที่ต้องการติดตั้งเอง", strengths: ["เป็นชุดเครื่องมือ OCR ที่มีโมเดลหลายแบบ", "มีโครงการ Open-source และเอกสารการใช้งาน"], caveat: "เป็น ecosystem ของ OCR ไม่ใช่โมเดลเดียว ต้องเลือก pipeline และภาษาที่รองรับ", url: "https://github.com/PaddlePaddle/PaddleOCR", access: "Open-source" }
+    ]
+  }
 ];

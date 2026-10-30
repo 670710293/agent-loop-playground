@@ -1,20 +1,20 @@
 # Phase 2 — Learning Assistant
 
-## Implemented
-- Refined the prompt area and example prompts while preserving the existing interaction.
-- Kept the five agent roles: Planner, Researcher, Analyst, Writer, Reviewer.
-- Added clear Rule-based Workflow labeling.
-- Improved trace messages and status handling.
-- Added fallback search across Thai/English Wikipedia.
-- Added API error handling, missing extract handling, and short-content handling.
-- Kept the study sheet, source link, copy Markdown, and download Markdown actions.
-- Added an explicit note that analysis and review are deterministic JavaScript logic.
+## สิ่งที่ปรับปรุง
+- ปรับพื้นที่ป้อนคำถามและตัวอย่างคำถาม โดยรักษาการทำงานเดิม
+- คงบทบาท Agent 5 ตัว: Planner, Researcher, Analyst, Writer และ Reviewer
+- เพิ่มป้ายระบุชัดเจนว่าเป็น Rule-based Workflow
+- ปรับข้อความแสดงขั้นตอนและสถานะการทำงาน
+- เพิ่มทางเลือกค้นหา Wikipedia ภาษาไทย/อังกฤษ
+- เพิ่มการจัดการ API Error, ไม่มีบทนำบทความ และเนื้อหาสั้นเกินไป
+- คงชีทสรุป ลิงก์แหล่งข้อมูล ปุ่ม Copy Markdown และ Download Markdown
+- ระบุชัดว่าการวิเคราะห์และการตรวจสอบเป็น Logic JavaScript ที่ให้ผลตามกฎ
 
-## Actual runtime behavior
-- Researcher: live request to Wikipedia API.
-- Analyst: browser-side text segmentation/frequency heuristics.
-- Writer: Markdown/template composition.
-- Reviewer: structural checks only (points, keywords, HTTPS URL).
+## พฤติกรรมที่เกิดขึ้นจริง
+- Researcher: ส่งคำขอไปยัง Wikipedia API จริง
+- Analyst: วิเคราะห์ด้วยการแบ่งข้อความและนับความถี่คำใน Browser
+- Writer: ประกอบเนื้อหาเป็น Markdown ตาม Template
+- Reviewer: ตรวจโครงสร้างพื้นฐาน เช่น จำนวนประเด็น คำสำคัญ และ URL แบบ HTTPS
 
-## Limitations
-The Reviewer does not validate whether claims are factually correct. The generated study sheet selects source sentences; it is not a fully generative summary.
+## ข้อจำกัด
+Reviewer ไม่ได้ตรวจว่าข้อความถูกต้องตามข้อเท็จจริงหรือไม่ ชีทสรุปเลือกประโยคจากแหล่งข้อมูลมาจัดรูปแบบ ไม่ใช่การสรุปแบบ Generative ด้วย LLM
