@@ -2,12 +2,7 @@
 
 เว็บสาธิตแนวคิดการแบ่งงานให้ AI Agent แต่ละตัวรับผิดชอบคนละหน้าที่ เพื่อจัดการงานค้นคว้าและการเรียนรู้ โดยมีหน้าเว็บหลัก 2 หน้า และออกแบบให้เผยแพร่ผ่าน GitHub Pages ได้โดยตรง
 
-<<<<<<< HEAD
 ## ทดลองใช้งานออนไลน์
-=======
-## Live demo -->  https://670710293.github.io/agent-loop-playground/
-Deploy this repository with GitHub Pages (Settings → Pages → Deploy from branch → `main` → `/ (root)`).
->>>>>>> 8b10212c3789bdc5297f44438cc3c3b43614989b
 
 สามารถเผยแพร่โปรเจกต์นี้ด้วย GitHub Pages ได้ที่  
 **Settings → Pages → Deploy from a branch → เลือก `main` → `/ (root)`**
@@ -21,7 +16,7 @@ Deploy this repository with GitHub Pages (Settings → Pages → Deploy from bra
 ## ระบบสาธิตทำงานอย่างไร?
 
 1. **Planner** อ่านคำถาม แยกหัวข้อ และตรวจจับภาษา
-2. **Researcher** ค้นหาและดึงบทนำของบทความจาก Wikipedia Public API
+2. **Researcher** เลือกแหล่งข้อมูลตามหมวดคำถามจาก GitHub, Crossref, PubMed, GDELT, World Bank หรือ Wikipedia
 3. **Analyst** วิเคราะห์ข้อความด้วยกฎและ heuristic ที่ทำงานใน Browser
 4. **Writer** จัดเนื้อหาเป็นชีทสรุป Markdown
 5. **Reviewer** ตรวจรูปแบบพื้นฐาน เช่น จำนวนประเด็น คำสำคัญ และ URL อ้างอิงแบบ HTTPS
@@ -30,7 +25,7 @@ Deploy this repository with GitHub Pages (Settings → Pages → Deploy from bra
 
 Agent ทั้ง 5 บทบาทในเวอร์ชันนี้เป็นขั้นตอนการทำงานที่เขียนด้วย JavaScript แบบ Rule-based ไม่ใช่ LLM 5 ตัวที่สนทนาหรือทำงานอิสระร่วมกัน
 
-- แหล่งข้อมูลภายนอกที่เรียกใช้งานจริงคือ Wikipedia API
+- แหล่งข้อมูลภายนอกที่รองรับในโค้ด ได้แก่ GitHub repository search, Crossref, PubMed, GDELT, World Bank Open Data และ Wikipedia โดยเลือกตามหมวดคำถาม
 - การวิเคราะห์ การเรียบเรียงชีท และการตรวจรูปแบบ ทำงานด้วย Logic ใน Browser
 - Reviewer ตรวจโครงสร้างเบื้องต้น ไม่ได้ตรวจสอบความจริงของเนื้อหาเชิงความหมาย
 - ส่วนเปรียบเทียบ Single AI vs Multi-Agent เป็นเนื้อหาเพื่อการเรียนรู้ ไม่ใช่ผลการทดลอง Benchmark
@@ -52,7 +47,7 @@ python3 -m http.server 8000
 - `index.html`, `models.html` — หน้าเว็บหลัก 2 หน้า
 - `style.css` — สี ฟอนต์ Layout การ์ด และการแสดงผลแบบ Responsive
 - `app.js` — การทำงานของหน้า Learning Assistant และ Workflow
-- `tools.js` — การเรียก Wikipedia API และเครื่องมือวิเคราะห์ข้อความในเครื่อง
+- `tools.js` — ตัวเชื่อมต่อ API หลายแหล่งและเครื่องมือวิเคราะห์ข้อความแบบ heuristic
 - `data.js` — ข้อมูลบทบาท Agent และรายการโมเดล
 - `models.js` — การสร้างการ์ดและเมนูหมวดหมู่ของ Model Explorer
 - `docs/` — เอกสารอธิบายงานในแต่ละ Phase
@@ -61,7 +56,7 @@ python3 -m http.server 8000
 
 ## ข้อจำกัดของเวอร์ชันนี้
 
-- Wikipedia เป็นแหล่งค้นคว้าภายนอกเพียงแหล่งเดียวในระบบปัจจุบัน
+- ยังไม่มี generic web search ครอบคลุมเว็บทั้งหมด; API เฉพาะทางอาจติดข้อจำกัด CORS/rate limit
 - การค้นหาและดึงข้อมูลขึ้นกับการให้บริการของ API และเครือข่าย
 - การวิเคราะห์ข้อความใช้กฎและ heuristic ไม่เทียบเท่าการสรุปโดย LLM
 - Model Explorer เป็นรายการตัวอย่างโมเดลเฉพาะทางที่คัดเลือกไว้ ไม่ใช่การจัดอันดับแบบเรียลไทม์
@@ -76,3 +71,15 @@ python3 -m http.server 8000
 หากต้องการพิสูจน์ว่า Single AI หรือ Multi-Agent เหมาะกับงานใดมากกว่า ควรออกแบบชุดโจทย์เดียวกัน เกณฑ์ประเมินที่โปร่งใส และวัดคุณภาพ เวลา รวมถึงต้นทุนจริงก่อนสรุปผล
 
 อ่านรายละเอียดเพิ่มเติมได้จาก `PROJECT_PLAN.md` และไฟล์ `docs/PHASE-*.md`
+
+## ระบบตรวจความตรงของคำตอบ (v8.1)
+หน้า Learning Assistant รองรับการเลือกภาษาไทย, English หรือให้ระบบตรวจจับภาษาอัตโนมัติ โดยเลือกแหล่งตามหมวดคำถาม; โหมดภาษาไทยจะใช้ Wikipedia ภาษาไทยเพื่อไม่ปะปนข้อความอังกฤษ ส่วน API เฉพาะทางมีข้อมูลภาษาอังกฤษเป็นหลัก ระบบเก็บคำถามต้นฉบับไว้ให้ Reviewer ตรวจความเกี่ยวข้องของบทความและประเด็นสรุป หากไม่ผ่านจะย้อนกลับไปลองบทความอื่นที่ยังไม่เคยใช้ และจะไม่ส่งร่างที่ไม่ผ่าน
+
+**ข้อจำกัด:** การตรวจความเกี่ยวข้องเป็นการให้คะแนนจากคำที่ตรงกันด้วย JavaScript heuristic ไม่ใช่การเข้าใจความหมายแบบ LLM หากคำถามซับซ้อน ใช้คำพ้องความหมาย หรือมีบริบทมาก ระบบอาจปฏิเสธคำตอบที่จริง ๆ เกี่ยวข้อง หรือยอมรับข้อมูลที่ยังไม่ตรงทั้งหมดได้ ควรเปิดแหล่งอ้างอิงตรวจสอบเสมอ
+
+
+## v8.2 — Multi-Source Researcher
+
+Researcher จำแนกหัวข้อและเลือกแหล่งข้อมูลเฉพาะทาง: GitHub (Programming), Crossref (Science), PubMed (Health), GDELT (News), World Bank (Economy/Statistics) และ Wikipedia (History/General และ fallback ตามภาษา) ระบบตัด URL ซ้ำและให้ Reviewer ตรวจความเกี่ยวข้องก่อนส่งผล
+
+**ข้อจำกัด:** เป็นการเรียก API สาธารณะจาก browser โดยตรง จึงอาจติด CORS, rate limit หรือเครือข่าย; ไม่มี API key ฝั่ง client; ไม่ได้แปลภาษาอัตโนมัติ; Reviewer เป็น keyword heuristic ไม่ใช่ LLM หรือ fact-check. ตรวจรายละเอียดใน `PROJECT_STATUS.md`.

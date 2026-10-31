@@ -44,3 +44,5 @@ footer{max-width:70rem;margin:0 auto;padding:1.5rem 1.4rem 2rem;border-top:1px s
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 
 .status-legend{display:flex;flex-wrap:wrap;gap:.55rem 1rem;margin-top:1.2rem;color:var(--mute);font-size:.78rem}.status-legend b{font:600 .65rem "IBM Plex Mono",monospace;padding:.15rem .4rem;border-radius:5px;margin-right:.25rem}.legend-live{background:color-mix(in srgb,var(--observe) 16%,transparent);color:var(--observe)}.legend-demo{background:color-mix(in srgb,var(--think) 15%,transparent);color:var(--think)}.legend-planned{background:color-mix(in srgb,var(--tool) 15%,transparent);color:var(--tool)}
+
+.language-row{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin:.45rem 0 .8rem}.language-row label{font-size:.88rem;font-weight:600}.language-select{min-height:38px;padding:.35rem .75rem;border:1px solid var(--edge);border-radius:.6rem;background:var(--surface);color:var(--ink);font:inherit}.language-row .micro-note{margin:0}

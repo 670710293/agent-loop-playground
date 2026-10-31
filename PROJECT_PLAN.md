@@ -3,9 +3,6 @@
 **เอกสารสำหรับพัฒนา Live Demo บน GitHub Pages**  
 **เวอร์ชัน:** v8 — Specialized Model Explorer
 
-### ด่วน!! List to do before สัมภาษณ์
-ทำไมถามคำถามแล้วไม่ได้เนื้อหาที่ตรงกับคำถาม เมื่อใช้กับ Multi-Agents
-
 ## 1. ทิศทางของโปรเจกต์
 
 Agent Loop Playground เป็นเว็บสาธิตแนวคิดการแบ่งงานให้ AI Agent แต่ละตัวรับผิดชอบหน้าที่เฉพาะ เพื่อให้ผู้ใช้เห็นว่าการออกแบบ Workflow อาจสำคัญพอ ๆ กับการเลือกโมเดล
@@ -73,7 +70,7 @@ Navigation:
 ### ลำดับการทำงาน
 1. ผู้ใช้พิมพ์คำถามหรือเลือกตัวอย่าง
 2. Planner แยกหัวข้อและตรวจภาษา
-3. Researcher ค้นและดึงบทนำจาก Wikipedia API
+3. Researcher เลือกแหล่งข้อมูลตามหมวดคำถามจาก public APIs หลายแห่ง
 4. Analyst วิเคราะห์ข้อความด้วย JavaScript heuristics
 5. Writer สร้างชีทสรุป
 6. Reviewer ตรวจรูปแบบพื้นฐานก่อนแสดงผล
@@ -141,7 +138,7 @@ agent-loop-playground/
 ├── agents.html         # เปลี่ยนเส้นทางลิงก์เก่าไปหน้า Model Explorer
 ├── style.css           # Design system และ Responsive layout
 ├── app.js              # UI และการทำงานหน้า Learning Assistant
-├── tools.js            # Wikipedia API และการวิเคราะห์ข้อความ
+├── tools.js            # Multi-source APIs และการวิเคราะห์ข้อความ
 ├── data.js             # ข้อมูล Agent และรายการโมเดล
 ├── models.js           # สร้างหมวดและการ์ด Model Explorer
 ├── README.md           # วิธีใช้งานและเผยแพร่
@@ -201,7 +198,7 @@ agent-loop-playground/
 - ทดสอบปุ่มและสถานะต่าง ๆ
 - ทดสอบ Mobile/Desktop
 - ตรวจ Console และ Network errors
-- ตรวจการทำงานของ Wikipedia API
+- ตรวจการทำงานของ APIs แต่ละ provider (Wikipedia, GitHub, Crossref, PubMed, GDELT, World Bank)
 - ตรวจว่าไม่มี API Key หรือ Secret ใน Repository
 - อัปเดต README และ PROJECT_STATUS
 
@@ -234,4 +231,18 @@ agent-loop-playground/
 **หลักการ:** ทำเวอร์ชัน Live Demo ให้กระชับ เข้าใจง่าย และซื่อสัตย์กับความสามารถจริงก่อน จากนั้นค่อยขยายตาม Feedback
 
 
+## การปรับปรุง Learning Assistant v8.2
+- เพิ่มตัวเลือกภาษาผลลัพธ์: ตรวจจับอัตโนมัติ / ภาษาไทย / English
+- Researcher ค้นหลายคำค้น รวมผลลัพธ์แบบไม่ซ้ำ และบันทึกบทความที่ลองแล้ว
+- Analyst จัดอันดับประโยคโดยใช้คำจากคำถามเป็นสัญญาณหลัก
+- Reviewer ตรวจความเกี่ยวข้องของบทความและประเด็นสรุปกับคำถามต้นฉบับ
+- เมื่อไม่ผ่านให้ย้อนกลับไป Researcher และข้ามบทความที่เคยลอง หากไม่มีแหล่งผ่านจะไม่ส่งชีทสรุป
+- ข้อจำกัด: การตรวจเป็น heuristic จากการจับคู่คำ ไม่ใช่ semantic understanding หรือ fact-check โดย LLM
 
+
+## v8.2 — Multi-Source Researcher (implemented, pending browser verification)
+- Route topic categories to relevant public APIs: GitHub, Crossref, PubMed, GDELT, World Bank, Wikipedia.
+- Deduplicate source URLs and skip attempted sources during one run.
+- Retain the original question as the relevance target for Reviewer.
+- Keep Thai queries on Thai Wikipedia; do not claim automatic translation of English API records.
+- Future: add a backend search proxy, generic web search provider, semantic reranker/LLM, evidence-level citations and source quality scoring.
