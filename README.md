@@ -2,6 +2,9 @@
 
 เว็บสาธิตแนวคิดการแบ่งงานให้ AI Agent แต่ละตัวรับผิดชอบคนละหน้าที่ เพื่อจัดการงานค้นคว้าและการเรียนรู้ โดยมีหน้าเว็บหลัก 2 หน้า และออกแบบให้เผยแพร่ผ่าน GitHub Pages ได้โดยตรง
 
+Link for Live Demo: https://670710293.github.io/agent-loop-playground/  
+Link for Source Code: https://github.com/670710293/agent-loop-playground/  
+
 ## Live-Demo
 
 สามารถเผยแพร่โปรเจกต์นี้ด้วย GitHub Pages ได้ที่  
