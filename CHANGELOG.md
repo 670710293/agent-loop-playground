@@ -33,3 +33,15 @@
 - Added URL deduplication, provider status traces and fallback behavior.
 - Kept Thai-language retrieval on Thai Wikipedia; clearly labels English source text and the lack of automatic translation.
 - Updated project status and documentation with API/CORS and heuristic limitations.
+
+## v8.3 — Thai-first bilingual research and response reliability
+- Removed the language selector; the user no longer needs to choose an input/output language.
+- Search now attempts Thai and English in parallel (with query translation where available).
+- Added DuckDuckGo Instant Answer as a lightweight general fallback and OpenAlex for research discovery.
+- PubMed now attempts to retrieve abstracts via EFetch instead of relying only on bibliographic metadata.
+- Only sources with substantive text are eligible to support the summary; metadata-only results remain trace/context and are not treated as evidence.
+- Removed keyword clouds and keyword-generated self-review questions from the study sheet.
+- English evidence is translated into Thai through MyMemory before the final Thai-first summary is assembled.
+- The writer merges and deduplicates relevant points from up to three sources; the reviewer checks output structure and provenance.
+- Added per-request timeouts, provider-level error isolation, and clear user-facing failure messages so a stalled API does not leave the submit button disabled indefinitely.
+- Limitations: translation and public API availability/rate limits/CORS are external dependencies; reviewer remains heuristic and does not semantically fact-check claims. No LLM or backend was added.

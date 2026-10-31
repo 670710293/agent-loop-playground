@@ -246,3 +246,7 @@ agent-loop-playground/
 - Retain the original question as the relevance target for Reviewer.
 - Keep Thai queries on Thai Wikipedia; do not claim automatic translation of English API records.
 - Future: add a backend search proxy, generic web search provider, semantic reranker/LLM, evidence-level citations and source quality scoring.
+
+
+## สถานะที่ใช้แทนแผนภาษาเดิม (v8.3)
+ตัวเลือกภาษาไทย/English/Auto ถูกนำออกแล้ว ระบบตรวจภาษาเบื้องหลังเพื่อสร้างคำค้นไทยและอังกฤษอัตโนมัติ และกำหนดผลลัพธ์เป็นภาษาไทยเสมอ โดยแปลหลักฐานอังกฤษผ่าน MyMemory ก่อน Writer เรียบเรียง ทั้งนี้บริการแปลและ Public API อาจไม่พร้อมใช้งาน จึงมี timeout และข้อความแจ้งข้อผิดพลาดแทนการปล่อยหน้าจอค้าง

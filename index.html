@@ -37,14 +37,14 @@
     <form id="form" class="ask">
       <label for="q">หัวข้อหรือคำถามของคุณ</label>
       <div class="input-row"><input id="q" required maxlength="180" placeholder="เช่น อธิบาย Machine Learning ให้เข้าใจง่าย" autocomplete="off"><button class="run" id="go" type="submit">เริ่มเรียนรู้ <span aria-hidden="true">↗</span></button></div>
-      <div class="language-row"><label for="language">ภาษาของผลสรุปและแหล่งค้นหา</label><select id="language" class="language-select"><option value="auto">ตรวจจับอัตโนมัติ</option><option value="th">ภาษาไทย · ค้น Wikipedia ไทย</option><option value="en">English · search topic-specific sources</option></select><span class="micro-note">เลือกภาษาให้ตรงกับภาษาที่พิมพ์ · ภาษาไทยค้น Wikipedia ไทย ส่วนแหล่ง API เฉพาะทางบางแห่งให้ข้อมูลภาษาอังกฤษ</span></div>
+      <p class="micro-note search-language-note">ระบบค้นข้อมูลทั้งภาษาไทยและอังกฤษโดยอัตโนมัติ และจัดทำสรุปภาษาไทยให้ทุกครั้ง</p>
       <div id="chips" class="chips" aria-label="ตัวอย่างคำถาม"></div>
     </form>
 
     <section class="workflow-panel" aria-labelledby="workflow-title">
       <div class="panel-heading"><div><p class="eyebrow">HOW THE TEAM WORKS</p><h3 id="workflow-title">Agent Workflow</h3></div><span class="demo-label">RULE-BASED WORKFLOW</span></div>
       <ol id="pipe" class="pipe" aria-label="ลำดับการทำงานของ Agent"></ol>
-      <p class="micro-note">ขั้นตอนนี้เป็น JavaScript workflow ที่ทำงานจริงใน Browser มีการให้ Reviewer ตรวจความเกี่ยวข้องด้วยเกณฑ์คำสำคัญ ไม่ใช่ LLM หลายตัวสนทนากัน</p>
+      <p class="micro-note">ขั้นตอนนี้เป็น JavaScript workflow ที่ทำงานจริงใน Browser; การคัดเลือกแหล่งใช้การจับคู่คำเบื้องต้น และ Reviewer ตรวจโครงสร้าง ไม่ใช่ LLM หลายตัวสนทนากัน</p>
     </section>
 
     <section id="chat" class="result-area" hidden aria-live="polite">
@@ -60,7 +60,7 @@
         <div class="acts"><button type="button" id="dl" class="primary">ดาวน์โหลด .md</button><button type="button" id="copy">คัดลอก Markdown</button></div>
       </article>
     </section>
-    <p class="disclaimer">ค้นข้อมูลจาก Wikipedia, GitHub, Crossref, PubMed, GDELT และ World Bank ตามหมวดคำถาม (บาง API อาจถูกจำกัดด้วย CORS/เครือข่าย) ส่วนการวิเคราะห์และ Reviewer ใช้เกณฑ์จับคู่คำใน JavaScript ไม่ใช่ LLM หรือ fact-check มนุษย์ ข้อความจากแหล่งภาษาอังกฤษจะไม่ถูกแปลอัตโนมัติ</p>
+    <p class="disclaimer">ค้นข้อมูลภาษาไทยและอังกฤษจาก Wikipedia, DuckDuckGo Instant Answer และ API เฉพาะทางตามหมวดคำถาม จากนั้นแปลข้อความอังกฤษเป็นไทยผ่านบริการแปลภายนอกและเรียบเรียงใหม่ ระบบอาจได้รับผลกระทบจาก CORS, rate limit หรือบริการแปลไม่พร้อมใช้งาน ส่วน Analyst/Reviewer ยังใช้กฎ JavaScript ไม่ใช่ LLM หรือ fact-check มนุษย์</p>
   </section>
 
   <section id="approach-comparison" class="comparison-section">
